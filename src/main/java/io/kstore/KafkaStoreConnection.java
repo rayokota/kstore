@@ -64,14 +64,14 @@ public class KafkaStoreConnection implements Connection {
 
 
     private final Configuration config;
-    private final Cache<KafkaSchemaKey, KafkaSchemaValue> schemas;
+    private Cache<KafkaSchemaKey, KafkaSchemaValue> schemas;
     private final Map<TableName, KafkaTable> tables = new ConcurrentHashMap<>();
     private final Set<TableName> disabledTables = new HashSet<>();
 
     public KafkaStoreConnection(Configuration config) {
         this.config = config;
         Map<String, Object> configs = new HashMap<>();
-        // TODO
+        // TODO pass in
         String groupId = "kstore-1";
         String topic = "_tables";
         configs.put(KafkaCacheConfig.KAFKACACHE_TOPIC_CONFIG, topic);
@@ -278,7 +278,12 @@ public class KafkaStoreConnection implements Connection {
         for (KafkaTable table : tables.values()) {
             table.close();
         }
-        schemas.close();
+        tables.clear();
+        disabledTables.clear();
+        if (schemas != null) {
+            schemas.close();
+            schemas = null;
+        }
     }
 
     /**

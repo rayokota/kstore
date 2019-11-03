@@ -39,7 +39,7 @@ public class KafkaTable implements Closeable {
     private static final Logger LOG = LoggerFactory.getLogger(KafkaTable.class);
 
     private KafkaSchemaValue schemaValue;
-    private final Cache<byte[], NavigableMap<byte[], NavigableMap<byte[], NavigableMap<Long, byte[]>>>> rows;
+    private Cache<byte[], NavigableMap<byte[], NavigableMap<byte[], NavigableMap<Long, byte[]>>>> rows;
 
     public KafkaTable(Configuration config, KafkaSchemaValue schemaValue) {
         this.schemaValue = schemaValue;
@@ -91,6 +91,9 @@ public class KafkaTable implements Closeable {
     }
 
     public void close() throws IOException {
-        rows.close();
+        if (rows != null) {
+            rows.close();
+            rows = null;
+        }
     }
 }

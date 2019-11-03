@@ -80,20 +80,7 @@ public class KafkaStoreRegionLocator implements RegionLocator {
     }
 
     private List<HRegionLocation> getRegions(boolean reload) throws IOException {
-        // TODO
         return Collections.emptyList();
-//        try {
-//            return getRegionsAsync(reload).get();
-//        } catch (InterruptedException e) {
-//            Thread.interrupted();
-//            throw new IOException("getRegionLocation was interrupted");
-//        } catch (ExecutionException e) {
-//            if (e.getCause() instanceof IOException) {
-//                throw (IOException) e.getCause();
-//            } else {
-//                throw new IOException("getRegionLocation ExecutionException", e);
-//            }
-//        }
     }
 
     /**

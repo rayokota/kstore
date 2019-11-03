@@ -787,9 +787,7 @@ public class KafkaStoreAdmin implements Admin {
      */
     @Override
     public List<HRegionInfo> getTableRegions(TableName tableName) throws IOException {
-        // TODO
         return Collections.emptyList();
-        //return connection.getAllRegionInfos(tableName);
     }
 
     /**
