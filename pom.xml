@@ -38,7 +38,7 @@
         <hbase.version>2.2.1</hbase.version>
         <jackson.version>2.10.0</jackson.version>
         <kcache.version>2.0.2</kcache.version>
-        <kryo.version>4.0.2</kryo.version>
+        <kryo.version>5.0.0-RC4</kryo.version>
         <sl4j.version>1.7.28</sl4j.version>
     </properties>
 
@@ -72,21 +72,6 @@
             <groupId>com.esotericsoftware</groupId>
             <artifactId>kryo</artifactId>
             <version>${kryo.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>de.javakaffee</groupId>
-            <artifactId>kryo-serializers</artifactId>
-            <version>0.45</version>
-        </dependency>
-        <dependency>
-            <groupId>org.msgpack</groupId>
-            <artifactId>msgpack-core</artifactId>
-            <version>0.8.18</version>
-        </dependency>
-        <dependency>
-            <groupId>org.msgpack</groupId>
-            <artifactId>jackson-dataformat-msgpack</artifactId>
-            <version>0.8.18</version>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
