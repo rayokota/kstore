@@ -34,7 +34,7 @@ public class KryoUtils {
 
     // Pool constructor arguments: thread safe, soft references
     private static final Pool<Kryo> kryoPool = new Pool<Kryo>(true, true) {
-        protected Kryo create () {
+        protected Kryo create() {
             Kryo kryo = new Kryo();
             // Configure the Kryo instance.
             kryo.register(byte[].class);

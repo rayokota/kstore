@@ -26,7 +26,7 @@ import java.util.Map;
 
 public class KafkaSchemaValueDeserializer implements Deserializer<KafkaSchemaValue> {
 
-    private ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
     public void configure(Map<String, ?> configs, boolean isKey) {
