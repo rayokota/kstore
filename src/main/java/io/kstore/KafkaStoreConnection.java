@@ -40,6 +40,7 @@ import org.apache.hadoop.hbase.client.RegionLocator;
 import org.apache.hadoop.hbase.client.Table;
 import org.apache.hadoop.hbase.client.TableBuilder;
 import org.apache.hadoop.hbase.client.TableDescriptorBuilder;
+import org.apache.hadoop.hbase.security.User;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -69,6 +70,10 @@ public class KafkaStoreConnection implements Connection {
     private final Set<TableName> disabledTables = new HashSet<>();
 
     public KafkaStoreConnection(Configuration config) {
+        this(config, null, null);
+    }
+
+    public KafkaStoreConnection(Configuration config, ExecutorService pool, User user) {
         this.config = config;
         Map<String, Object> configs = new HashMap<>();
         // TODO pass in
