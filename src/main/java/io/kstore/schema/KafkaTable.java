@@ -19,6 +19,7 @@ package io.kstore.schema;
 import io.kcache.Cache;
 import io.kcache.KafkaCache;
 import io.kcache.KafkaCacheConfig;
+import io.kcache.utils.Caches;
 import io.kcache.utils.InMemoryCache;
 import io.kstore.serialization.KryoSerde;
 import org.apache.hadoop.conf.Configuration;
@@ -54,9 +55,10 @@ public class KafkaTable implements Closeable {
         configs.put(KafkaCacheConfig.KAFKACACHE_CLIENT_ID_CONFIG, groupId + "-" + topic);
         // TODO
         configs.put(KafkaCacheConfig.KAFKACACHE_BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
-        this.rows = new KafkaCache<>(
+        Cache<byte[], NavigableMap<byte[], NavigableMap<byte[], NavigableMap<Long, byte[]>>>> rowMap = new KafkaCache<>(
             new KafkaCacheConfig(configs), Serdes.ByteArray(), new KryoSerde<>(), null,
             new InMemoryCache<>(new ConcurrentSkipListMap<>(Bytes.BYTES_COMPARATOR)));
+        this.rows = Caches.concurrentCache(rowMap);
 
         //this.data = new InMemoryCache<>(new TreeMap<>(Bytes.BYTES_COMPARATOR));
         /*
