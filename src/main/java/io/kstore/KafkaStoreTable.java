@@ -130,10 +130,12 @@ public class KafkaStoreTable implements Table {
 
     private static List<Cell> toKeyValue(byte[] row, NavigableMap<byte[], NavigableMap<byte[], NavigableMap<Long, byte[]>>> rowdata, long timestampStart, long timestampEnd, int maxVersions) {
         List<Cell> ret = new ArrayList<>();
-        for (byte[] family : rowdata.keySet()) {
-            for (byte[] qualifier : rowdata.get(family).keySet()) {
+        for (Map.Entry<byte[], NavigableMap<byte[], NavigableMap<Long, byte[]>>> entry : rowdata.entrySet()) {
+            byte[] family = entry.getKey();
+            for (Map.Entry<byte[], NavigableMap<Long, byte[]>> innerEntry : entry.getValue().entrySet()) {
+                byte[] qualifier = innerEntry.getKey();
                 int versionsAdded = 0;
-                for (Map.Entry<Long, byte[]> tsToVal : rowdata.get(family).get(qualifier).descendingMap().entrySet()) {
+                for (Map.Entry<Long, byte[]> tsToVal : innerEntry.getValue().descendingMap().entrySet()) {
                     if (versionsAdded++ == maxVersions)
                         break;
                     Long timestamp = tsToVal.getKey();
@@ -229,21 +231,19 @@ public class KafkaStoreTable implements Table {
                 kvs = kvs.subList(0, maxResults);
             }
         } else {
-            for (byte[] family : get.getFamilyMap().keySet()) {
-                if (rowData.get(family) == null)
+            for (Map.Entry<byte[], NavigableSet<byte[]>> entry : get.getFamilyMap().entrySet()) {
+                byte[] family = entry.getKey();
+                NavigableMap<byte[], NavigableMap<Long, byte[]>> familyData = rowData.get(family);
+                if (familyData == null)
                     continue;
-                NavigableSet<byte[]> qualifiers = get.getFamilyMap().get(family);
+                NavigableSet<byte[]> qualifiers = entry.getValue();
                 if (qualifiers == null || qualifiers.isEmpty())
-                    qualifiers = rowData.get(family).navigableKeySet();
+                    qualifiers = familyData.navigableKeySet();
                 List<Cell> familyKvs = new ArrayList<>();
                 for (byte[] qualifier : qualifiers) {
-                    if (qualifier == null)
-                        qualifier = "".getBytes(StandardCharsets.UTF_8);
-                    if (!rowData.containsKey(family) ||
-                        !rowData.get(family).containsKey(qualifier) ||
-                        rowData.get(family).get(qualifier).isEmpty())
+                    if (!familyData.containsKey(qualifier) || familyData.get(qualifier).isEmpty())
                         continue;
-                    Map.Entry<Long, byte[]> timestampAndValue = rowData.get(family).get(qualifier).lastEntry();
+                    Map.Entry<Long, byte[]> timestampAndValue = familyData.get(qualifier).lastEntry();
                     familyKvs.add(new KeyValue(row, family, qualifier, timestampAndValue.getKey(), timestampAndValue.getValue()));
                 }
                 if (filter != null) {
@@ -290,8 +290,9 @@ public class KafkaStoreTable implements Table {
             subData = subData.subCache(st, true, sp, false);
         }
 
-        for (byte[] row : subData.keySet()) {
-            NavigableMap<byte[], NavigableMap<byte[], NavigableMap<Long, byte[]>>> rowData = data.get(row);
+        for (Map.Entry<byte[], NavigableMap<byte[], NavigableMap<byte[], NavigableMap<Long, byte[]>>>> entry : subData.entrySet()) {
+            byte[] row = entry.getKey();
+            NavigableMap<byte[], NavigableMap<byte[], NavigableMap<Long, byte[]>>> rowData = entry.getValue();
             List<Cell> kvs;
             if (!scan.hasFamilies()) {
                 kvs = toKeyValue(row, rowData, scan.getTimeRange().getMin(), scan.getTimeRange().getMax(), scan.getMaxVersions());
@@ -303,21 +304,24 @@ public class KafkaStoreTable implements Table {
                 }
             } else {
                 kvs = new ArrayList<>();
-                for (byte[] family : scan.getFamilyMap().keySet()) {
-                    if (rowData.get(family) == null)
+                for (Map.Entry<byte[], NavigableSet<byte[]>> innerEntry : scan.getFamilyMap().entrySet()) {
+                    byte[] family = innerEntry.getKey();
+                    NavigableMap<byte[], NavigableMap<Long, byte[]>> familyData = rowData.get(family);
+                    if (familyData == null)
                         continue;
-                    NavigableSet<byte[]> qualifiers = scan.getFamilyMap().get(family);
+                    NavigableSet<byte[]> qualifiers = innerEntry.getValue();
                     if (qualifiers == null || qualifiers.isEmpty())
-                        qualifiers = rowData.get(family).navigableKeySet();
+                        qualifiers = familyData.navigableKeySet();
                     List<Cell> familyKvs = new ArrayList<>();
                     for (byte[] qualifier : qualifiers) {
-                        if (rowData.get(family).get(qualifier) == null)
+                        if (familyData.get(qualifier) == null)
                             continue;
                         List<KeyValue> tsKvs = new ArrayList<>();
-                        for (Long timestamp : rowData.get(family).get(qualifier).descendingKeySet()) {
+                        for (Map.Entry<Long, byte[]> innerMostEntry : familyData.get(qualifier).descendingMap().entrySet()) {
+                            Long timestamp = innerMostEntry.getKey();
                             if (timestamp < scan.getTimeRange().getMin() || timestamp > scan.getTimeRange().getMax())
                                 continue;
-                            byte[] value = rowData.get(family).get(qualifier).get(timestamp);
+                            byte[] value = innerMostEntry.getValue();
                             tsKvs.add(new KeyValue(row, family, qualifier, timestamp, value));
                             if (tsKvs.size() == scan.getMaxVersions()) {
                                 break;
@@ -468,9 +472,10 @@ public class KafkaStoreTable implements Table {
     public void put(Put put) throws IOException {
         byte[] row = put.getRow();
         NavigableMap<byte[], NavigableMap<byte[], NavigableMap<Long, byte[]>>> rowData = forceFind(data, row, new TreeMap<>(Bytes.BYTES_COMPARATOR));
-        for (byte[] family : put.getFamilyCellMap().keySet()) {
+        for (Map.Entry<byte[], List<Cell>> entry : put.getFamilyCellMap().entrySet()) {
+            byte[] family = entry.getKey();
             NavigableMap<byte[], NavigableMap<Long, byte[]>> familyData = forceFind(rowData, family, new TreeMap<>(Bytes.BYTES_COMPARATOR));
-            for (Cell kv : put.getFamilyCellMap().get(family)) {
+            for (Cell kv : entry.getValue()) {
                 long ts = put.getTimestamp();
                 if (ts == HConstants.LATEST_TIMESTAMP) ts = System.currentTimeMillis();
                 CellUtil.updateLatestStamp(kv, ts);
@@ -556,14 +561,15 @@ public class KafkaStoreTable implements Table {
             data.remove(row);
             return;
         }
-        for (byte[] family : delete.getFamilyCellMap().keySet()) {
+        for (Map.Entry<byte[], List<Cell>> entry : delete.getFamilyCellMap().entrySet()) {
+            byte[] family = entry.getKey();
             if (rowData.get(family) == null)
                 continue;
-            if (delete.getFamilyCellMap().get(family).isEmpty()) {
+            if (entry.getValue().isEmpty()) {
                 rowData.remove(family);
                 continue;
             }
-            for (Cell kv : delete.getFamilyCellMap().get(family)) {
+            for (Cell kv : entry.getValue()) {
                 long ts = kv.getTimestamp();
                 if (kv.getType() == Cell.Type.DeleteColumn) {
                     if (ts == HConstants.LATEST_TIMESTAMP) {
