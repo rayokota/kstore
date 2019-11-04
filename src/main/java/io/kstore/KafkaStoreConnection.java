@@ -54,15 +54,14 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 
+import static io.kstore.Constants.DEFAULT_FAMILY_BYTES;
+
 public class KafkaStoreConnection implements Connection {
 
     private static final Logger LOG = LoggerFactory.getLogger(KafkaStoreConnection.class);
 
-    private static final String DEFAULT_FAMILY = "f";
-    private static final byte[] DEFAULT_FAMILY_BYTES = Bytes.toBytes(DEFAULT_FAMILY);
     private static final int MIN_VERSION = 1;
     private static final int MAX_VERSION = Integer.MAX_VALUE;
-
 
     private final Configuration config;
     private Cache<KafkaSchemaKey, KafkaSchemaValue> schemas;
@@ -75,15 +74,13 @@ public class KafkaStoreConnection implements Connection {
 
     public KafkaStoreConnection(Configuration config, ExecutorService pool, User user) {
         this.config = config;
-        Map<String, Object> configs = new HashMap<>();
-        // TODO pass in
-        String groupId = "kstore-1";
+        Map<String, String> configs = new HashMap<>(config.getValByRegex("kafkacache.*"));
         String topic = "_tables";
+        String groupId = config.get(KafkaCacheConfig.KAFKACACHE_GROUP_ID_CONFIG, "kstore-1");
+        String clientId = config.get(KafkaCacheConfig.KAFKACACHE_CLIENT_ID_CONFIG, groupId + "-" + topic);
         configs.put(KafkaCacheConfig.KAFKACACHE_TOPIC_CONFIG, topic);
         configs.put(KafkaCacheConfig.KAFKACACHE_GROUP_ID_CONFIG, groupId);
-        configs.put(KafkaCacheConfig.KAFKACACHE_CLIENT_ID_CONFIG, groupId + "-" + topic);
-        // TODO
-        configs.put(KafkaCacheConfig.KAFKACACHE_BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
+        configs.put(KafkaCacheConfig.KAFKACACHE_CLIENT_ID_CONFIG, clientId);
         // Always reload all tables on startup as they need to be initialized properly
         Cache<KafkaSchemaKey, KafkaSchemaValue> schemaMap = new KafkaCache<>(
             new KafkaCacheConfig(configs), new KafkaSchemaKeySerde(), new KafkaSchemaValueSerde(),

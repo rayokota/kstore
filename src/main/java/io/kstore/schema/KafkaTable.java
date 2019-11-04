@@ -21,6 +21,7 @@ import io.kcache.KafkaCache;
 import io.kcache.KafkaCacheConfig;
 import io.kcache.utils.Caches;
 import io.kcache.utils.InMemoryCache;
+import io.kcache.utils.rocksdb.RocksDBCache;
 import io.kstore.serialization.KryoSerde;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.TableName;
@@ -31,48 +32,46 @@ import org.slf4j.LoggerFactory;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.NavigableMap;
 import java.util.concurrent.ConcurrentSkipListMap;
 
+import static io.kstore.Constants.ROCKS_DB_ENABLE_CONFIG;
+import static io.kstore.Constants.ROCKS_DB_ROOT_DIR_CONFIG;
+import static io.kstore.Constants.ROCKS_DB_ROOT_DIR_DEFAULT;
+
 public class KafkaTable implements Closeable {
     private static final Logger LOG = LoggerFactory.getLogger(KafkaTable.class);
 
+    private Configuration config;
     private KafkaSchemaValue schemaValue;
     private Cache<byte[], NavigableMap<byte[], NavigableMap<byte[], NavigableMap<Long, byte[]>>>> rows;
 
     public KafkaTable(Configuration config, KafkaSchemaValue schemaValue) {
+        this.config = config;
         this.schemaValue = schemaValue;
         TableName tableName = TableName.valueOf(schemaValue.getTableName());
         int epoch = schemaValue.getEpoch();
+        Map<String, String> configs = new HashMap<>(config.getValByRegex("kafkacache.*"));
         String topic = tableName.getQualifierAsString() + "_" + epoch;
-        Map<String, Object> configs = new HashMap<>();
-        // TODO pass in
-        String groupId = "kstore-1";
+        String groupId = config.get(KafkaCacheConfig.KAFKACACHE_GROUP_ID_CONFIG, "kstore-1");
+        String clientId = config.get(KafkaCacheConfig.KAFKACACHE_CLIENT_ID_CONFIG, groupId + "-" + topic);
         configs.put(KafkaCacheConfig.KAFKACACHE_TOPIC_CONFIG, topic);
         configs.put(KafkaCacheConfig.KAFKACACHE_GROUP_ID_CONFIG, groupId);
-        configs.put(KafkaCacheConfig.KAFKACACHE_CLIENT_ID_CONFIG, groupId + "-" + topic);
-        // TODO
-        configs.put(KafkaCacheConfig.KAFKACACHE_BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
-        Cache<byte[], NavigableMap<byte[], NavigableMap<byte[], NavigableMap<Long, byte[]>>>> rowMap = new KafkaCache<>(
-            new KafkaCacheConfig(configs), Serdes.ByteArray(), new KryoSerde<>(), null,
-            new InMemoryCache<>(new ConcurrentSkipListMap<>(Bytes.BYTES_COMPARATOR)));
-        this.rows = Caches.concurrentCache(rowMap);
-
-        //this.data = new InMemoryCache<>(new TreeMap<>(Bytes.BYTES_COMPARATOR));
-        /*
-        configs.put(KafkaCacheConfig.KAFKACACHE_ENABLE_OFFSET_COMMIT_CONFIG, true);
-        String enableRocksDbStr = (String) configs.getOrDefault(KarelDbConfig.ROCKS_DB_ENABLE_CONFIG, "true");
+        configs.put(KafkaCacheConfig.KAFKACACHE_CLIENT_ID_CONFIG, clientId);
+        configs.put(KafkaCacheConfig.KAFKACACHE_ENABLE_OFFSET_COMMIT_CONFIG, "true");
+        String enableRocksDbStr = config.get(ROCKS_DB_ENABLE_CONFIG, "true");
         boolean enableRocksDb = Boolean.parseBoolean(enableRocksDbStr);
-        String rootDir = (String) configs.getOrDefault(
-            KarelDbConfig.ROCKS_DB_ROOT_DIR_CONFIG, KarelDbConfig.ROCKS_DB_ROOT_DIR_DEFAULT);
-        Comparator<byte[]> cmp = new AvroKeyComparator(schemas.left);
-        Cache<byte[], byte[]> cache = enableRocksDb
-            ? new RocksDBCache<>(topic, "rocksdb", rootDir, Serdes.ByteArray(), Serdes.ByteArray(), cmp)
-            : new InMemoryCache<>(cmp);
-
-         */
+        String rootDir = config.get(ROCKS_DB_ROOT_DIR_CONFIG, ROCKS_DB_ROOT_DIR_DEFAULT);
+        Comparator<byte[]> cmp = Bytes.BYTES_COMPARATOR;
+        Cache<byte[], NavigableMap<byte[], NavigableMap<byte[], NavigableMap<Long, byte[]>>>> cache = enableRocksDb
+            ? new RocksDBCache<>(topic, "rocksdb", rootDir, Serdes.ByteArray(), new KryoSerde<>(), cmp)
+            : new InMemoryCache<>(new ConcurrentSkipListMap<>(cmp));
+        Cache<byte[], NavigableMap<byte[], NavigableMap<byte[], NavigableMap<Long, byte[]>>>> rowMap = new KafkaCache<>(
+            new KafkaCacheConfig(configs), Serdes.ByteArray(), new KryoSerde<>(), null, cache);
+        this.rows = Caches.concurrentCache(rowMap);
     }
 
     public void init() {
