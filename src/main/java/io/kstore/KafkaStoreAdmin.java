@@ -20,6 +20,7 @@ import io.kstore.schema.KafkaSchemaKey;
 import io.kstore.schema.KafkaSchemaValue;
 import io.kstore.schema.KafkaSchemaValue.Action;
 import io.kstore.schema.KafkaTable;
+import io.kstore.schema.TableDef;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.CacheEvictionStats;
 import org.apache.hadoop.hbase.ClusterMetrics;
@@ -71,7 +72,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -304,7 +304,7 @@ public class KafkaStoreAdmin implements Admin {
             return null;
         }
 
-        return new HTableDescriptor(getLatestSchemaValue(tableName).getSchema());
+        return new HTableDescriptor(getLatestSchemaValue(tableName).getSchema().toDesc());
     }
 
     /**
@@ -366,7 +366,7 @@ public class KafkaStoreAdmin implements Admin {
         }
         int version = latest != null ? latest.getVersion() + 1 : 1;
         schemas.put(new KafkaSchemaKey(tableName.getNameAsString(), version),
-            new KafkaSchemaValue(tableName.getNameAsString(), version, desc, Action.CREATE, version));
+            new KafkaSchemaValue(tableName.getNameAsString(), version, new TableDef(desc), Action.CREATE, version));
         schemas.flush();
         // Initialize the table
         KafkaTable table = getTables().get(tableName);
@@ -458,7 +458,7 @@ public class KafkaStoreAdmin implements Admin {
     }
 
     @Override
-    public void modifyTable(TableName tableName, TableDescriptor tableDescriptor) throws IOException {
+    public void modifyTable(TableName tableName, TableDescriptor tableDesc) throws IOException {
         Cache<KafkaSchemaKey, KafkaSchemaValue> schemas = getSchemas();
         KafkaSchemaValue latest = getLatestSchemaValue(tableName);
         if (latest == null || latest.getAction() == Action.DROP) {
@@ -466,7 +466,7 @@ public class KafkaStoreAdmin implements Admin {
         }
         int version = latest.getVersion();
         schemas.put(new KafkaSchemaKey(tableName.getNameAsString(), version + 1),
-            new KafkaSchemaValue(tableName.getNameAsString(), version + 1, tableDescriptor, Action.ALTER, latest.getEpoch()));
+            new KafkaSchemaValue(tableName.getNameAsString(), version + 1, new TableDef(tableDesc), Action.ALTER, latest.getEpoch()));
         schemas.flush();
     }
 

@@ -17,15 +17,14 @@
 package io.kstore.serialization;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.kstore.schema.KafkaSchemaKey;
+import io.kstore.schema.KafkaSchemaValue;
 import org.apache.kafka.common.errors.SerializationException;
-import org.apache.kafka.common.serialization.Deserializer;
+import org.apache.kafka.common.serialization.Serializer;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
-public class KafkaSchemaKeyDeserializer implements Deserializer<KafkaSchemaKey> {
+public class KafkaSchemaValueSerializer implements Serializer<KafkaSchemaValue> {
 
     private ObjectMapper objectMapper = new ObjectMapper();
 
@@ -34,12 +33,11 @@ public class KafkaSchemaKeyDeserializer implements Deserializer<KafkaSchemaKey> 
     }
 
     @Override
-    public KafkaSchemaKey deserialize(String topic, byte[] key) throws SerializationException {
+    public byte[] serialize(String topic, KafkaSchemaValue value) {
         try {
-            return objectMapper.readValue(key, KafkaSchemaKey.class);
+            return objectMapper.writeValueAsBytes(value);
         } catch (IOException e) {
-            throw new SerializationException("Error while deserializing schema key "
-                + new String(key, StandardCharsets.UTF_8), e);
+            throw new SerializationException("Error while serializing schema value", e);
         }
     }
 }

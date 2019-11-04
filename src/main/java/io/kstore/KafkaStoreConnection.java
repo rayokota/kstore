@@ -28,7 +28,7 @@ import io.kstore.schema.KafkaSchemaKey;
 import io.kstore.schema.KafkaSchemaValue;
 import io.kstore.schema.KafkaTable;
 import io.kstore.serialization.KafkaSchemaKeySerde;
-import io.kstore.serialization.KryoSerde;
+import io.kstore.serialization.KafkaSchemaValueSerde;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.TableName;
 import org.apache.hadoop.hbase.client.Admin;
@@ -81,7 +81,7 @@ public class KafkaStoreConnection implements Connection {
         configs.put(KafkaCacheConfig.KAFKACACHE_BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
         // Always reload all tables on startup as they need to be initialized properly
         Cache<KafkaSchemaKey, KafkaSchemaValue> schemaMap = new KafkaCache<>(
-            new KafkaCacheConfig(configs), new KafkaSchemaKeySerde(), new KryoSerde<>(),
+            new KafkaCacheConfig(configs), new KafkaSchemaKeySerde(), new KafkaSchemaValueSerde(),
             new TableUpdateHandler(), new InMemoryCache<>());
         this.schemas = Caches.concurrentCache(schemaMap);
         this.schemas.init();

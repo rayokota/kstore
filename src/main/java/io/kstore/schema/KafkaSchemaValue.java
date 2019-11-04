@@ -17,7 +17,7 @@
 
 package io.kstore.schema;
 
-import org.apache.hadoop.hbase.client.TableDescriptor;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.Objects;
 
@@ -25,15 +25,15 @@ public class KafkaSchemaValue {
 
     private final String tableName;
     private final Integer version;
-    private final TableDescriptor schema;
+    private final TableDef schema;
     private final Action action;
     private final Integer epoch;
 
-    public KafkaSchemaValue(String tableName,
-                            Integer version,
-                            TableDescriptor schema,
-                            Action action,
-                            Integer epoch) {
+    public KafkaSchemaValue(@JsonProperty("tableName") String tableName,
+                            @JsonProperty("version") Integer version,
+                            @JsonProperty("schema") TableDef schema,
+                            @JsonProperty("action") Action action,
+                            @JsonProperty("epoch") Integer epoch) {
         this.tableName = tableName;
         this.version = version;
         this.schema = schema;
@@ -41,22 +41,27 @@ public class KafkaSchemaValue {
         this.epoch = epoch;
     }
 
+    @JsonProperty("tableName")
     public String getTableName() {
         return tableName;
     }
 
+    @JsonProperty("version")
     public Integer getVersion() {
         return this.version;
     }
 
-    public TableDescriptor getSchema() {
+    @JsonProperty("schema")
+    public TableDef getSchema() {
         return this.schema;
     }
 
+    @JsonProperty("action")
     public Action getAction() {
         return action;
     }
 
+    @JsonProperty("epoch")
     public Integer getEpoch() {
         return this.epoch;
     }

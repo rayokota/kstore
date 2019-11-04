@@ -98,7 +98,7 @@ public class KafkaStoreTable implements Table {
      */
     @Override
     public TableDescriptor getDescriptor() throws IOException {
-        return conn.getLatestSchemaValue(tableName).getSchema();
+        return conn.getLatestSchemaValue(tableName).getSchema().toDesc();
     }
 
     /**

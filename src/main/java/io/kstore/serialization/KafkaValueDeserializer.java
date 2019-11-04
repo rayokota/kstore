@@ -16,30 +16,33 @@
  */
 package io.kstore.serialization;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.kstore.schema.KafkaSchemaKey;
+import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.kafka.common.errors.SerializationException;
 import org.apache.kafka.common.serialization.Deserializer;
+import org.msgpack.jackson.dataformat.MessagePackFactory;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.Map;
+import java.util.TreeMap;
 
-public class KafkaSchemaKeyDeserializer implements Deserializer<KafkaSchemaKey> {
+public class KafkaValueDeserializer implements Deserializer<TreeMap<String, TreeMap<String, TreeMap<Long, byte[]>>>> {
 
-    private ObjectMapper objectMapper = new ObjectMapper();
+    private ObjectMapper objectMapper = new ObjectMapper(new MessagePackFactory());
+    private TypeReference<TreeMap<String, TreeMap<String, TreeMap<Long, byte[]>>>> typeReference =
+        new TypeReference<TreeMap<String, TreeMap<String, TreeMap<Long, byte[]>>>>() {};
 
     @Override
     public void configure(Map<String, ?> configs, boolean isKey) {
     }
 
     @Override
-    public KafkaSchemaKey deserialize(String topic, byte[] key) throws SerializationException {
+    public TreeMap<String, TreeMap<String, TreeMap<Long, byte[]>>> deserialize(String topic, byte[] value) throws SerializationException {
         try {
-            return objectMapper.readValue(key, KafkaSchemaKey.class);
+            return objectMapper.readValue(value, typeReference);
         } catch (IOException e) {
-            throw new SerializationException("Error while deserializing schema key "
-                + new String(key, StandardCharsets.UTF_8), e);
+            throw new SerializationException("Error while deserializing value", e);
         }
     }
 }

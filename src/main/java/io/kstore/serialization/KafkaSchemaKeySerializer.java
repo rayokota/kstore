@@ -26,6 +26,8 @@ import java.util.Map;
 
 public class KafkaSchemaKeySerializer implements Serializer<KafkaSchemaKey> {
 
+    private ObjectMapper objectMapper = new ObjectMapper();
+
     @Override
     public void configure(Map<String, ?> configs, boolean isKey) {
     }
@@ -33,7 +35,7 @@ public class KafkaSchemaKeySerializer implements Serializer<KafkaSchemaKey> {
     @Override
     public byte[] serialize(String topic, KafkaSchemaKey key) {
         try {
-            return new ObjectMapper().writeValueAsBytes(key);
+            return objectMapper.writeValueAsBytes(key);
         } catch (IOException e) {
             throw new SerializationException("Error while serializing schema key " + key.toString(),
                 e);
