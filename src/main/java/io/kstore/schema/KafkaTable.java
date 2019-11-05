@@ -55,7 +55,7 @@ public class KafkaTable implements Closeable {
         TableName tableName = TableName.valueOf(schemaValue.getTableName());
         int epoch = schemaValue.getEpoch();
         Map<String, String> configs = new HashMap<>(config.getValByRegex("kafkacache.*"));
-        String topic = tableName.getQualifierAsString() + "_" + epoch;
+        String topic = tableName.getNamespaceAsString() + "_" + tableName.getQualifierAsString() + "_" + epoch;
         String groupId = config.get(KafkaCacheConfig.KAFKACACHE_GROUP_ID_CONFIG, "kstore-1");
         String clientId = config.get(KafkaCacheConfig.KAFKACACHE_CLIENT_ID_CONFIG, groupId + "-" + topic);
         configs.put(KafkaCacheConfig.KAFKACACHE_TOPIC_CONFIG, topic);
