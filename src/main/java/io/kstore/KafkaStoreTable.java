@@ -17,6 +17,7 @@ import com.google.protobuf.Message;
 import com.google.protobuf.Service;
 import com.google.protobuf.ServiceException;
 import io.kcache.Cache;
+import io.kcache.KeyValueIterator;
 import io.kstore.schema.KafkaTable;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.Cell;
@@ -282,16 +283,18 @@ public class KafkaStoreTable implements Table {
         Filter filter = scan.getFilter();
         int maxResults = scan.getMaxResultsPerColumnFamily();
 
-        Cache<byte[], NavigableMap<byte[], NavigableMap<byte[], NavigableMap<Long, byte[]>>>> subData = data;
-        //scan.isReversed() ? data.descendingMap() : data;
+        Cache<byte[], NavigableMap<byte[], NavigableMap<byte[], NavigableMap<Long, byte[]>>>> subData =
+            scan.isReversed() ? data.descendingCache() : data;
 
         if (st != null || sp != null) {
             subData = subData.subCache(st, true, sp, false);
         }
 
-        for (Map.Entry<byte[], NavigableMap<byte[], NavigableMap<byte[], NavigableMap<Long, byte[]>>>> entry : subData.entrySet()) {
-            byte[] row = entry.getKey();
-            NavigableMap<byte[], NavigableMap<byte[], NavigableMap<Long, byte[]>>> rowData = entry.getValue();
+        KeyValueIterator<byte[], NavigableMap<byte[], NavigableMap<byte[], NavigableMap<Long, byte[]>>>> iter = subData.all();
+        while (iter.hasNext()) {
+            io.kcache.KeyValue<byte[], NavigableMap<byte[], NavigableMap<byte[], NavigableMap<Long, byte[]>>>> entry = iter.next();
+            byte[] row = entry.key;
+            NavigableMap<byte[], NavigableMap<byte[], NavigableMap<Long, byte[]>>> rowData = entry.value;
             List<Cell> kvs;
             if (!scan.hasFamilies()) {
                 kvs = toKeyValue(row, rowData, scan.getTimeRange().getMin(), scan.getTimeRange().getMax(), scan.getMaxVersions());
@@ -484,6 +487,7 @@ public class KafkaStoreTable implements Table {
             }
         }
         data.put(row, rowData);
+        data.flush();
     }
 
     /**
@@ -556,8 +560,9 @@ public class KafkaStoreTable implements Table {
         NavigableMap<byte[], NavigableMap<byte[], NavigableMap<Long, byte[]>>> rowData = data.get(row);
         if (rowData == null)
             return;
-        if (delete.getFamilyCellMap().size() == 0) {
+        if (delete.getFamilyCellMap().isEmpty()) {
             data.remove(row);
+            data.flush();
             return;
         }
         for (Map.Entry<byte[], List<Cell>> entry : delete.getFamilyCellMap().entrySet()) {
@@ -593,6 +598,7 @@ public class KafkaStoreTable implements Table {
         } else {
             data.put(row, rowData);
         }
+        data.flush();
     }
 
     /**
@@ -672,6 +678,7 @@ public class KafkaStoreTable implements Table {
         rowData.get(family).get(qualifier).put(System.currentTimeMillis(),
             Bytes.toBytes(newValue));
         data.put(row, rowData);
+        data.flush();
         return newValue;
     }
 
