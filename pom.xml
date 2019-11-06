@@ -37,7 +37,7 @@
         <guava.version>27.1-jre</guava.version>
         <hbase.version>2.2.1</hbase.version>
         <jackson.version>2.10.0</jackson.version>
-        <kcache.version>2.0.2</kcache.version>
+        <kcache.version>3.0.0</kcache.version>
         <kryo.version>5.0.0-RC4</kryo.version>
         <sl4j.version>1.7.28</sl4j.version>
     </properties>
