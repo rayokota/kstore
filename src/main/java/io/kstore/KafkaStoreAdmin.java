@@ -1365,10 +1365,6 @@ public class KafkaStoreAdmin implements Admin {
 
     /**
      * {@inheritDoc}
-     *
-     * <p>HBase column operations are not synchronous, since they're not as fast as Bigtable. Bigtable
-     * does not have async operations, so always return (0, 0). This is needed for some shell
-     * operations.
      */
     @Override
     public Pair<Integer, Integer> getAlterStatus(TableName tableName) throws IOException {
@@ -1386,7 +1382,7 @@ public class KafkaStoreAdmin implements Admin {
     // ------------ SNAPSHOT methods begin
 
     /**
-     * Creates a snapshot from an existing table. NOTE: Cloud Bigtable has a cleanup policy
+     * Creates a snapshot from an existing table.
      *
      * @param snapshotName a {@link String} object.
      * @param tableName    a {@link TableName} object.
