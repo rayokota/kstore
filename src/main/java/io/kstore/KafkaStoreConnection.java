@@ -361,7 +361,7 @@ public class KafkaStoreConnection implements Connection {
                     table = tables.get(tableName);
                     if (table != null) {
                         try {
-                            table.close();
+                            table.getCache().close();
                         } catch (IOException e) {
                             throw new RuntimeException(e);
                         }
