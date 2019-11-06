@@ -27,11 +27,6 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 
-/**
- * BigtableRegionLocator class.
- *
- * <p>For internal use only - public for technical reasons.
- */
 public class KafkaStoreRegionLocator implements RegionLocator {
 
     protected static final Logger LOG = LoggerFactory.getLogger(KafkaStoreRegionLocator.class);
