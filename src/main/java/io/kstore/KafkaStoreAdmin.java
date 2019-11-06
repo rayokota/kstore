@@ -19,7 +19,6 @@ import io.kcache.Cache;
 import io.kstore.schema.KafkaSchemaKey;
 import io.kstore.schema.KafkaSchemaValue;
 import io.kstore.schema.KafkaSchemaValue.Action;
-import io.kstore.schema.KafkaTable;
 import io.kstore.schema.TableDef;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.CacheEvictionStats;
@@ -116,7 +115,7 @@ public class KafkaStoreAdmin implements Admin {
         return conn.getSchemas();
     }
 
-    public Map<TableName, KafkaTable> getTables() {
+    public Map<TableName, KafkaStoreTable> getTables() {
         return conn.getTables();
     }
 
@@ -369,8 +368,8 @@ public class KafkaStoreAdmin implements Admin {
             new KafkaSchemaValue(tableName.getNameAsString(), version, new TableDef(desc), Action.CREATE, version));
         schemas.flush();
         // Initialize the table
-        KafkaTable table = getTables().get(tableName);
-        table.init();
+        KafkaStoreTable table = getTables().get(tableName);
+        table.getCache().init();
     }
 
     public static byte[][] createSplitKeys(byte[] startKey, byte[] endKey, int numRegions) {

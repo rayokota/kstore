@@ -18,7 +18,7 @@ import com.google.protobuf.Service;
 import com.google.protobuf.ServiceException;
 import io.kcache.Cache;
 import io.kcache.KeyValueIterator;
-import io.kstore.schema.KafkaTable;
+import io.kstore.schema.KafkaSchemaValue;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.Cell;
 import org.apache.hadoop.hbase.CellUtil;
@@ -63,18 +63,24 @@ import java.util.NavigableSet;
 import java.util.NoSuchElementException;
 import java.util.TreeMap;
 
-public class KafkaStoreTable implements Table {
+public abstract class KafkaStoreTable implements Table {
 
     private static final Logger LOG = LoggerFactory.getLogger(KafkaStoreTable.class);
 
     private final KafkaStoreConnection conn;
     private final TableName tableName;
+    private final KafkaTableCache cache;
     private final Cache<byte[], NavigableMap<byte[], NavigableMap<byte[], NavigableMap<Long, byte[]>>>> data;
 
-    public KafkaStoreTable(KafkaStoreConnection conn, TableName tableName, KafkaTable table) {
+    public KafkaStoreTable(Configuration config, KafkaStoreConnection conn, KafkaSchemaValue schemaValue) {
         this.conn = conn;
-        this.tableName = tableName;
-        this.data = table.getRows();
+        this.tableName = TableName.valueOf(schemaValue.getTableName());
+        this.cache = new KafkaTableCache(config, schemaValue);
+        this.data = cache.getRows();
+    }
+
+    public KafkaTableCache getCache() {
+        return cache;
     }
 
     /**
@@ -106,12 +112,15 @@ public class KafkaStoreTable implements Table {
      */
     @Override
     public void mutateRow(RowMutations rm) throws IOException {
-        // currently only support Put and Delete
         for (Mutation mutation : rm.getMutations()) {
             if (mutation instanceof Put) {
                 put((Put) mutation);
             } else if (mutation instanceof Delete) {
                 delete((Delete) mutation);
+            } else if (mutation instanceof Increment) {
+                increment((Increment) mutation);
+            } else if (mutation instanceof Append) {
+                append((Append) mutation);
             }
         }
     }
@@ -675,8 +684,7 @@ public class KafkaStoreTable implements Table {
         }
         NavigableMap<byte[], NavigableMap<byte[], NavigableMap<Long, byte[]>>> rowData = data.get(row);
         long newValue = Bytes.toLong(rowData.get(family).get(qualifier).lastEntry().getValue()) + amount;
-        rowData.get(family).get(qualifier).put(System.currentTimeMillis(),
-            Bytes.toBytes(newValue));
+        rowData.get(family).get(qualifier).put(System.currentTimeMillis(), Bytes.toBytes(newValue));
         data.put(row, rowData);
         data.flush();
         return newValue;

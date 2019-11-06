@@ -26,7 +26,6 @@ import io.kcache.utils.InMemoryCache;
 import io.kcache.utils.Streams;
 import io.kstore.schema.KafkaSchemaKey;
 import io.kstore.schema.KafkaSchemaValue;
-import io.kstore.schema.KafkaTable;
 import io.kstore.serialization.KafkaSchemaKeySerde;
 import io.kstore.serialization.KafkaSchemaValueSerde;
 import org.apache.hadoop.conf.Configuration;
@@ -41,7 +40,6 @@ import org.apache.hadoop.hbase.client.Table;
 import org.apache.hadoop.hbase.client.TableBuilder;
 import org.apache.hadoop.hbase.client.TableDescriptorBuilder;
 import org.apache.hadoop.hbase.security.User;
-import org.apache.hadoop.hbase.util.Bytes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -65,7 +63,7 @@ public class KafkaStoreConnection implements Connection {
 
     private final Configuration config;
     private Cache<KafkaSchemaKey, KafkaSchemaValue> schemas;
-    private final Map<TableName, KafkaTable> tables = new ConcurrentHashMap<>();
+    private final Map<TableName, KafkaStoreTable> tables = new ConcurrentHashMap<>();
     private final Set<TableName> disabledTables = new HashSet<>();
 
     public KafkaStoreConnection(Configuration config) {
@@ -90,7 +88,7 @@ public class KafkaStoreConnection implements Connection {
         // Initialize tables in parallel
         CompletableFuture
             .allOf(tables.values().stream()
-                .map(t -> CompletableFuture.runAsync(t::init))
+                .map(t -> CompletableFuture.runAsync(() -> t.getCache().init()))
                 .toArray(CompletableFuture[]::new))
             .join();
     }
@@ -99,7 +97,7 @@ public class KafkaStoreConnection implements Connection {
         return schemas;
     }
 
-    public Map<TableName, KafkaTable> getTables() {
+    public Map<TableName, KafkaStoreTable> getTables() {
         return tables;
     }
 
@@ -160,14 +158,14 @@ public class KafkaStoreConnection implements Connection {
      */
     @Override
     public Table getTable(TableName tableName, ExecutorService pool) throws IOException {
-        KafkaTable table = tables.get(tableName);
+        KafkaStoreTable table = tables.get(tableName);
         if (table == null) {
             getAdmin().createTable(TableDescriptorBuilder.newBuilder(tableName)
                 .setColumnFamily(ColumnFamilyDescriptorBuilder.newBuilder(DEFAULT_FAMILY_BYTES).build())
                 .build());
             table = tables.get(tableName);
         }
-        return new KafkaStoreTable(this, tableName, table);
+        return table;
     }
 
     /**
@@ -277,8 +275,8 @@ public class KafkaStoreConnection implements Connection {
 
     @Override
     public void close() throws IOException {
-        for (KafkaTable table : tables.values()) {
-            table.close();
+        for (KafkaStoreTable table : tables.values()) {
+            table.getCache().close();
         }
         tables.clear();
         disabledTables.clear();
@@ -347,16 +345,16 @@ public class KafkaStoreConnection implements Connection {
         @Override
         public void handleUpdate(KafkaSchemaKey kafkaSchemaKey, KafkaSchemaValue kafkaSchemaValue) {
             TableName tableName = TableName.valueOf(kafkaSchemaKey.getTableName());
-            KafkaTable table;
+            KafkaStoreTable table;
             switch (kafkaSchemaValue.getAction()) {
                 case CREATE:
-                    table = new KafkaTable(config, kafkaSchemaValue);
+                    table = new KafkaStoreTxTable(config, KafkaStoreConnection.this, kafkaSchemaValue);
                     tables.put(tableName, table);
                     LOG.info("Created table: {}", tableName);
                     break;
                 case ALTER:
                     table = tables.get(tableName);
-                    table.setSchemaValue(kafkaSchemaValue);
+                    table.getCache().setSchemaValue(kafkaSchemaValue);
                     LOG.info("Modified table: {}", tableName);
                     break;
                 case DROP:
@@ -374,5 +372,4 @@ public class KafkaStoreConnection implements Connection {
             }
         }
     }
-
 }

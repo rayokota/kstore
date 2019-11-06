@@ -14,14 +14,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.kstore.schema;
+package io.kstore;
 
 import io.kcache.Cache;
 import io.kcache.KafkaCache;
 import io.kcache.KafkaCacheConfig;
-import io.kcache.utils.Caches;
 import io.kcache.utils.InMemoryCache;
 import io.kcache.utils.rocksdb.RocksDBCache;
+import io.kstore.schema.KafkaSchemaValue;
 import io.kstore.serialization.KryoSerde;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.TableName;
@@ -42,14 +42,14 @@ import static io.kstore.Constants.ROCKS_DB_ENABLE_CONFIG;
 import static io.kstore.Constants.ROCKS_DB_ROOT_DIR_CONFIG;
 import static io.kstore.Constants.ROCKS_DB_ROOT_DIR_DEFAULT;
 
-public class KafkaTable implements Closeable {
-    private static final Logger LOG = LoggerFactory.getLogger(KafkaTable.class);
+public class KafkaTableCache implements Closeable {
+    private static final Logger LOG = LoggerFactory.getLogger(KafkaTableCache.class);
 
-    private Configuration config;
+    private final Configuration config;
     private KafkaSchemaValue schemaValue;
     private Cache<byte[], NavigableMap<byte[], NavigableMap<byte[], NavigableMap<Long, byte[]>>>> rows;
 
-    public KafkaTable(Configuration config, KafkaSchemaValue schemaValue) {
+    public KafkaTableCache(Configuration config, KafkaSchemaValue schemaValue) {
         this.config = config;
         this.schemaValue = schemaValue;
         TableName tableName = TableName.valueOf(schemaValue.getTableName());
@@ -71,7 +71,7 @@ public class KafkaTable implements Closeable {
             : new InMemoryCache<>(new ConcurrentSkipListMap<>(cmp));
         Cache<byte[], NavigableMap<byte[], NavigableMap<byte[], NavigableMap<Long, byte[]>>>> rowMap = new KafkaCache<>(
             new KafkaCacheConfig(configs), Serdes.ByteArray(), new KryoSerde<>(), null, cache);
-        this.rows = Caches.concurrentCache(rowMap);
+        this.rows = rowMap;
     }
 
     public void init() {
