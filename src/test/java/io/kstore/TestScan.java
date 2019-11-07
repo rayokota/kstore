@@ -108,7 +108,6 @@ public class TestScan extends AbstractTest {
                 .addColumn(COLUMN_FAMILY, qual, ts1, values[0])
                 .addColumn(COLUMN_FAMILY, qual, ts2, values[1]));
 
-        /*
         Scan scan1 =
             new Scan().withStartRow(rowKey).withStopRow(rowFollowing(rowKey)).setTimeRange(0, ts1);
         try (ResultScanner resultScanner = table.getScanner(scan1)) {
@@ -123,8 +122,6 @@ public class TestScan extends AbstractTest {
             Assert.assertArrayEquals(
                 values[1], CellUtil.cloneValue(result.getColumnLatestCell(COLUMN_FAMILY, qual)));
         }
-
-         */
 
         Scan scan3 =
             new Scan().withStartRow(rowKey).withStopRow(rowFollowing(rowKey)).setTimeRange(0, ts1 + 1);
@@ -220,6 +217,68 @@ public class TestScan extends AbstractTest {
                     Assert.assertArrayEquals(
                         values[i], CellUtil.cloneValue(result.getColumnLatestCell(COLUMN_FAMILY, quals[i])));
                 }
+            }
+
+            // Verify that there are no more rows:
+            Assert.assertNull(
+                "There should not be any more results in the scanner.", resultScanner.next());
+        }
+
+        // Cleanup
+        ArrayList<Delete> deletes = new ArrayList<>(rowsToWrite);
+        for (int rowIndex = 0; rowIndex < rowsToWrite; rowIndex++) {
+            deletes.add(new Delete(rowKeys[rowIndex]));
+        }
+        table.delete(deletes);
+        table.close();
+    }
+
+    @Test
+    public void test100ResultsInReverseScanner() throws IOException {
+        String prefix = "scan_row_";
+        int rowsToWrite = 100;
+
+        // Initialize variables
+        Table table = getDefaultTable();
+
+        byte[][] rowKeys = new byte[rowsToWrite][];
+        rowKeys[0] = dataHelper.randomData(prefix);
+        for (int i = 1; i < rowsToWrite; i++) {
+            rowKeys[i] = rowFollowingSameLength(rowKeys[i - 1]);
+        }
+
+        int numValuesPerRow = 3;
+        byte[][] quals = dataHelper.randomData("qual-", numValuesPerRow);
+        byte[][] values = dataHelper.randomData("value-", numValuesPerRow);
+
+        ArrayList<Put> puts = new ArrayList<>(rowsToWrite);
+
+        // Insert some columns
+        for (int rowIndex = 0; rowIndex < rowsToWrite; rowIndex++) {
+            Put put = new Put(rowKeys[rowIndex]);
+            for (int qualifierIndex = 0; qualifierIndex < numValuesPerRow; qualifierIndex++) {
+                put.addColumn(COLUMN_FAMILY, quals[qualifierIndex], values[qualifierIndex]);
+            }
+            puts.add(put);
+        }
+        table.put(puts);
+
+        Scan scan = new Scan();
+        scan.setReversed(true);
+        scan.withStopRow(rowKeys[0], true)
+            .withStartRow(rowKeys[rowsToWrite - 1])
+            .addFamily(COLUMN_FAMILY);
+
+        try (ResultScanner resultScanner = table.getScanner(scan)) {
+            for (int rowIndex = 0; rowIndex < rowsToWrite; rowIndex++) {
+                Result result = resultScanner.next();
+
+                Assert.assertNotNull(String.format("Didn't expect row %s to be null", rowIndex), result);
+
+                Assert.assertEquals(numValuesPerRow, result.size());
+
+                // Check row keys are reversed
+                Assert.assertArrayEquals(rowKeys[rowsToWrite - 1 - rowIndex], result.getRow());
             }
 
             // Verify that there are no more rows:

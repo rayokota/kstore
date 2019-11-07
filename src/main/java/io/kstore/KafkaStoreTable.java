@@ -328,11 +328,11 @@ public abstract class KafkaStoreTable implements Table {
             scan.isReversed() ? data.descendingCache() : data;
 
         if (st != null || sp != null) {
-            boolean stopInclusive = false;
+            boolean includeStopRow = scan.includeStopRow();
             if (st != null && sp != null && Arrays.equals(st, sp)) {
-                stopInclusive = true;
+                includeStopRow = true;
             }
-            subData = subData.subCache(st, true, sp, stopInclusive);
+            subData = subData.subCache(st, scan.includeStartRow(), sp, includeStopRow);
         }
 
         KeyValueIterator<byte[], NavigableMap<byte[], NavigableMap<byte[], NavigableMap<Long, byte[]>>>> iter = subData.all();
