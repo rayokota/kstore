@@ -296,10 +296,6 @@ public class TestScan extends AbstractTest {
     }
 
     @Test
-    /**
-     * Cloud Bigtable had problems with operations that happened during a scan. Create 100 rows, scan
-     * for them, and delete each resulting row. Make sure that this problem doesn't reoccur.
-     */
     public void testScanDelete() throws IOException {
         String prefix = "scan_delete_";
         int rowsToWrite = 100;
