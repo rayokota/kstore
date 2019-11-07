@@ -34,7 +34,7 @@ public abstract class AbstractTest extends ClusterTestHarness {
     public static final byte[] COLUMN_FAMILY = Bytes.toBytes("test_family");
     public static final byte[] COLUMN_FAMILY2 = Bytes.toBytes("test_family2");
 
-    protected static DataGenerationHelper dataHelper = new DataGenerationHelper();
+    protected static final DataGenerationHelper dataHelper = new DataGenerationHelper();
 
     private Configuration config;
     private Connection conn;

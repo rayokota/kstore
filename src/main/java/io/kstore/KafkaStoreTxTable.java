@@ -15,6 +15,7 @@ package io.kstore;
 import com.google.common.util.concurrent.Striped;
 import io.kstore.schema.KafkaSchemaValue;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.hbase.CompareOperator;
 import org.apache.hadoop.hbase.client.Append;
 import org.apache.hadoop.hbase.client.Delete;
 import org.apache.hadoop.hbase.client.Get;
@@ -117,21 +118,7 @@ public class KafkaStoreTxTable extends KafkaStoreTable {
      * {@inheritDoc}
      */
     @Override
-    public boolean checkAndPut(byte[] row, byte[] family, byte[] qualifier, byte[] value, Put put) throws IOException {
-        Lock lock = striped.get(new Bytes(row)).writeLock();
-        lock.lock();
-        try {
-            return super.checkAndPut(row, family, qualifier, value, put);
-        } finally {
-            lock.unlock();
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean checkAndPut(byte[] row, byte[] family, byte[] qualifier, CompareFilter.CompareOp compareOp, byte[] value, Put put) throws IOException {
+    public boolean checkAndPut(byte[] row, byte[] family, byte[] qualifier, CompareOperator compareOp, byte[] value, Put put) throws IOException {
         Lock lock = striped.get(new Bytes(row)).writeLock();
         lock.lock();
         try {
@@ -157,21 +144,7 @@ public class KafkaStoreTxTable extends KafkaStoreTable {
      * {@inheritDoc}
      */
     @Override
-    public boolean checkAndDelete(byte[] row, byte[] family, byte[] qualifier, byte[] value, Delete delete) throws IOException {
-        Lock lock = striped.get(new Bytes(row)).writeLock();
-        lock.lock();
-        try {
-            return super.checkAndDelete(row, family, qualifier, value, delete);
-        } finally {
-            lock.unlock();
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean checkAndDelete(byte[] row, byte[] family, byte[] qualifier, CompareFilter.CompareOp compareOp, byte[] value, Delete delete) throws IOException {
+    public boolean checkAndDelete(byte[] row, byte[] family, byte[] qualifier, CompareOperator compareOp, byte[] value, Delete delete) throws IOException {
         Lock lock = striped.get(new Bytes(row)).writeLock();
         lock.lock();
         try {
@@ -185,7 +158,7 @@ public class KafkaStoreTxTable extends KafkaStoreTable {
      * {@inheritDoc}
      */
     @Override
-    public boolean checkAndMutate(byte[] row, byte[] family, byte[] qualifier, CompareFilter.CompareOp compareOp, byte[] value, RowMutations rm) throws IOException {
+    public boolean checkAndMutate(byte[] row, byte[] family, byte[] qualifier, CompareOperator compareOp, byte[] value, RowMutations rm) throws IOException {
         Lock lock = striped.get(new Bytes(row)).writeLock();
         lock.lock();
         try {

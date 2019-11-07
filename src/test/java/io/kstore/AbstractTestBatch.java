@@ -64,9 +64,9 @@ public abstract class AbstractTestBatch extends AbstractTest {
         byte[][] values = new byte[count][];
         byte[] emptyRowKey = dataHelper.randomData("testrow-");
 
-        List<Row> puts = new ArrayList<Row>(count);
-        List<Row> gets = new ArrayList<Row>(count);
-        List<Row> deletes = new ArrayList<Row>(count);
+        List<Row> puts = new ArrayList<>(count);
+        List<Row> gets = new ArrayList<>(count);
+        List<Row> deletes = new ArrayList<>(count);
         for (int i = 0; i < count; i++) {
             rowKeys[i] = dataHelper.randomData("testrow-");
             quals[i] = sameQualifier && i > 0 ? quals[0] : dataHelper.randomData("qual-");
@@ -134,7 +134,7 @@ public abstract class AbstractTestBatch extends AbstractTest {
         // Put
         Put put1 = new Put(rowKey1).addColumn(COLUMN_FAMILY, qual1, Bytes.toBytes(value1));
         Put put2 = new Put(rowKey2).addColumn(COLUMN_FAMILY, qual2, Bytes.toBytes(value2));
-        List<Row> batch = new ArrayList<Row>(2);
+        List<Row> batch = new ArrayList<>(2);
         batch.add(put1);
         batch.add(put2);
         table.batch(batch, null);
@@ -230,7 +230,7 @@ public abstract class AbstractTestBatch extends AbstractTest {
 
         Put put1 = new Put(rowKey1).addColumn(COLUMN_FAMILY, qual1, value1);
         Put put2 = new Put(rowKey2).addColumn(COLUMN_FAMILY, qual2, value2);
-        List<Row> batch = new ArrayList<Row>(2);
+        List<Row> batch = new ArrayList<>(2);
         batch.add(put1);
         batch.add(put2);
         Object[] results = new Object[batch.size()];

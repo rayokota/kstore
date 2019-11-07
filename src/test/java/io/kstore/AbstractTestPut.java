@@ -54,7 +54,7 @@ public abstract class AbstractTestPut extends AbstractTest {
 
         // Construct put with NUM_CELL random qualifier/value combos
         Put put = new Put(rowKey);
-        List<QualifierValue> keyValues = new ArrayList<QualifierValue>(100);
+        List<QualifierValue> keyValues = new ArrayList<>(100);
         for (int i = 0; i < NUM_CELLS; ++i) {
             put.addColumn(COLUMN_FAMILY, quals[i], values[i]);
             keyValues.add(new QualifierValue(quals[i], values[i]));
@@ -96,9 +96,9 @@ public abstract class AbstractTestPut extends AbstractTest {
         byte[][] values = dataHelper.randomData("testValue-", NUM_ROWS);
 
         // Do puts
-        List<Put> puts = new ArrayList<Put>(NUM_ROWS);
-        List<String> keys = new ArrayList<String>(NUM_ROWS);
-        Map<String, QualifierValue> insertedKeyValues = new TreeMap<String, QualifierValue>();
+        List<Put> puts = new ArrayList<>(NUM_ROWS);
+        List<String> keys = new ArrayList<>(NUM_ROWS);
+        Map<String, QualifierValue> insertedKeyValues = new TreeMap<>();
         for (int i = 0; i < NUM_ROWS; ++i) {
             Put put = new Put(rowKeys[i]);
             put.addColumn(COLUMN_FAMILY, qualifiers[i], values[i]);
@@ -111,7 +111,7 @@ public abstract class AbstractTestPut extends AbstractTest {
         table.put(puts);
 
         // Get
-        List<Get> gets = new ArrayList<Get>(NUM_ROWS);
+        List<Get> gets = new ArrayList<>(NUM_ROWS);
         Collections.shuffle(keys); // Retrieve in random order
         for (String key : keys) {
             Get get = new Get(Bytes.toBytes(key));
@@ -135,7 +135,7 @@ public abstract class AbstractTestPut extends AbstractTest {
         }
 
         // Delete
-        List<Delete> deletes = new ArrayList<Delete>(NUM_ROWS);
+        List<Delete> deletes = new ArrayList<>(NUM_ROWS);
         for (byte[] rowKey : rowKeys) {
             Delete delete = new Delete(rowKey);
             deletes.add(delete);
@@ -195,8 +195,8 @@ public abstract class AbstractTestPut extends AbstractTest {
 
         // Construct put with NUM_CELL random qualifier/value combos
         Put put = new Put(rowKey);
-        List<QualifierValue> family1KeyValues = new ArrayList<QualifierValue>(100);
-        List<QualifierValue> family2KeyValues = new ArrayList<QualifierValue>(100);
+        List<QualifierValue> family1KeyValues = new ArrayList<>(100);
+        List<QualifierValue> family2KeyValues = new ArrayList<>(100);
         for (int i = 0; i < NUM_CELLS; i++) {
             put.addColumn(COLUMN_FAMILY, quals[i], values[i]);
             family1KeyValues.add(new QualifierValue(quals[i], values[i]));

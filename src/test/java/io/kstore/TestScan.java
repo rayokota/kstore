@@ -100,8 +100,8 @@ public class TestScan extends AbstractTest {
         byte[] qual = dataHelper.randomData("qual-");
         byte[][] values = dataHelper.randomData("value-", 2);
 
-        long ts1 = 100000l;
-        long ts2 = 200000l;
+        long ts1 = 100000L;
+        long ts2 = 200000L;
 
         table.put(
             new Put(rowKey)

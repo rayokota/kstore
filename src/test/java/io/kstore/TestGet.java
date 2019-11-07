@@ -134,7 +134,7 @@ public class TestGet extends AbstractTest {
         int numVersions = 5;
         int minVersion = 1;
         int maxVersion = 4;
-        long timestamps[] = dataHelper.sequentialTimestamps(numVersions);
+        long[] timestamps = dataHelper.sequentialTimestamps(numVersions);
         byte[][] values = dataHelper.randomData("value-", numVersions);
 
         // Insert values with different timestamps at the same column.
@@ -178,7 +178,7 @@ public class TestGet extends AbstractTest {
         byte[] qual = dataHelper.randomData("qual-");
         int numVersions = 5;
         int particularTimestamp = 3;
-        long timestamps[] = dataHelper.sequentialTimestamps(numVersions);
+        long[] timestamps = dataHelper.sequentialTimestamps(numVersions);
         byte[][] values = dataHelper.randomData("value-", numVersions);
 
         // Insert several timestamps for a single row/column.
@@ -218,7 +218,7 @@ public class TestGet extends AbstractTest {
         byte[] qual = dataHelper.randomData("qual-");
         int totalVersions = 5;
         int maxVersions = 3;
-        long timestamps[] = dataHelper.sequentialTimestamps(totalVersions);
+        long[] timestamps = dataHelper.sequentialTimestamps(totalVersions);
         byte[][] values = dataHelper.randomData("value-", totalVersions);
 
         // Insert several versions into the same row/col
@@ -266,7 +266,7 @@ public class TestGet extends AbstractTest {
 
         // Insert a bunch of columns.
         Put put = new Put(rowKey);
-        List<QualifierValue> keyValues = new ArrayList<QualifierValue>();
+        List<QualifierValue> keyValues = new ArrayList<>();
         for (int i = 0; i < totalColumns; ++i) {
             put.addColumn(COLUMN_FAMILY, quals[i], timestamps[i], values[i]);
 
@@ -348,7 +348,7 @@ public class TestGet extends AbstractTest {
         byte[][] values = dataHelper.randomData("value-", numValues);
 
         // Insert a bunch of data
-        List<Put> puts = new ArrayList<Put>(numValues);
+        List<Put> puts = new ArrayList<>(numValues);
         for (int i = 0; i < numValues; ++i) {
             Put put = new Put(rowKeys[i]);
             put.addColumn(COLUMN_FAMILY, quals[i], values[0]);
@@ -357,7 +357,7 @@ public class TestGet extends AbstractTest {
         table.put(puts);
 
         // Test just keys, both individually and as batch.
-        List<Get> gets = new ArrayList<Get>(numValues);
+        List<Get> gets = new ArrayList<>(numValues);
         for (int i = 0; i < numValues; ++i) {
             Get get = new Get(rowKeys[i]);
             Assert.assertTrue(table.exists(get));
@@ -464,8 +464,8 @@ public class TestGet extends AbstractTest {
         table.put(put);
 
         Get get = new Get(rowKey);
-        for (int i = 0; i < qualifiers.length; i++) {
-            get.addColumn(COLUMN_FAMILY, qualifiers[i]);
+        for (byte[] qualifier : qualifiers) {
+            get.addColumn(COLUMN_FAMILY, qualifier);
         }
 
         Result result = table.get(get);

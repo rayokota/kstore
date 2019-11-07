@@ -324,10 +324,10 @@ public abstract class AbstractTestCheckAndMutate extends AbstractTest {
 
         table.put(
             new Put(rowKey)
-                .addColumn(COLUMN_FAMILY, qualToCheck, Bytes.toBytes(2000l)));
+                .addColumn(COLUMN_FAMILY, qualToCheck, Bytes.toBytes(2000L)));
 
         Put someRandomPut =
-            new Put(rowKey).addColumn(COLUMN_FAMILY, otherQual, Bytes.toBytes(1l));
+            new Put(rowKey).addColumn(COLUMN_FAMILY, otherQual, Bytes.toBytes(1L));
 
         success =
             checkAndPut(
@@ -335,7 +335,7 @@ public abstract class AbstractTestCheckAndMutate extends AbstractTest {
                 COLUMN_FAMILY,
                 qualToCheck,
                 CompareOp.LESS,
-                Bytes.toBytes(1000l),
+                Bytes.toBytes(1000L),
                 someRandomPut);
         Assert.assertTrue("1000 < 2000 should succeed", success);
 
@@ -345,7 +345,7 @@ public abstract class AbstractTestCheckAndMutate extends AbstractTest {
                 COLUMN_FAMILY,
                 qualToCheck,
                 CompareOp.LESS,
-                Bytes.toBytes(4000l),
+                Bytes.toBytes(4000L),
                 someRandomPut);
         Assert.assertFalse("4000 < 2000 should fail", success);
 
@@ -355,7 +355,7 @@ public abstract class AbstractTestCheckAndMutate extends AbstractTest {
                 COLUMN_FAMILY,
                 qualToCheck,
                 CompareOp.GREATER,
-                Bytes.toBytes(1000l),
+                Bytes.toBytes(1000L),
                 someRandomPut);
         Assert.assertFalse("1000 > 2000 should fail", success);
 
@@ -365,7 +365,7 @@ public abstract class AbstractTestCheckAndMutate extends AbstractTest {
                 COLUMN_FAMILY,
                 qualToCheck,
                 CompareOp.GREATER,
-                Bytes.toBytes(4000l),
+                Bytes.toBytes(4000L),
                 someRandomPut);
         Assert.assertTrue("4000 > 2000 should succeed", success);
 
@@ -375,7 +375,7 @@ public abstract class AbstractTestCheckAndMutate extends AbstractTest {
                 COLUMN_FAMILY,
                 qualToCheck,
                 CompareOp.LESS_OR_EQUAL,
-                Bytes.toBytes(1000l),
+                Bytes.toBytes(1000L),
                 someRandomPut);
         Assert.assertTrue("1000 <= 2000 should succeed", success);
 
@@ -385,7 +385,7 @@ public abstract class AbstractTestCheckAndMutate extends AbstractTest {
                 COLUMN_FAMILY,
                 qualToCheck,
                 CompareOp.LESS_OR_EQUAL,
-                Bytes.toBytes(4000l),
+                Bytes.toBytes(4000L),
                 someRandomPut);
         Assert.assertFalse("4000 <= 2000 should fail", success);
 
@@ -395,7 +395,7 @@ public abstract class AbstractTestCheckAndMutate extends AbstractTest {
                 COLUMN_FAMILY,
                 qualToCheck,
                 CompareOp.GREATER_OR_EQUAL,
-                Bytes.toBytes(1000l),
+                Bytes.toBytes(1000L),
                 someRandomPut);
         Assert.assertFalse("1000 >= 2000 should fail", success);
 
@@ -405,7 +405,7 @@ public abstract class AbstractTestCheckAndMutate extends AbstractTest {
                 COLUMN_FAMILY,
                 qualToCheck,
                 CompareOp.GREATER_OR_EQUAL,
-                Bytes.toBytes(4000l),
+                Bytes.toBytes(4000L),
                 someRandomPut);
         Assert.assertTrue("4000 >= 2000 should succeed", success);
 
@@ -415,7 +415,7 @@ public abstract class AbstractTestCheckAndMutate extends AbstractTest {
                 COLUMN_FAMILY,
                 qualToCheck,
                 CompareOp.EQUAL,
-                Bytes.toBytes(1000l),
+                Bytes.toBytes(1000L),
                 someRandomPut);
         Assert.assertFalse("1000 == 2000 should fail", success);
 
@@ -425,7 +425,7 @@ public abstract class AbstractTestCheckAndMutate extends AbstractTest {
                 COLUMN_FAMILY,
                 qualToCheck,
                 CompareOp.EQUAL,
-                Bytes.toBytes(2000l),
+                Bytes.toBytes(2000L),
                 someRandomPut);
         Assert.assertTrue("2000 == 2000 should succeed", success);
 
@@ -435,7 +435,7 @@ public abstract class AbstractTestCheckAndMutate extends AbstractTest {
                 COLUMN_FAMILY,
                 qualToCheck,
                 CompareOp.NOT_EQUAL,
-                Bytes.toBytes(2000l),
+                Bytes.toBytes(2000L),
                 someRandomPut);
         Assert.assertFalse("2000 != 2000 should fail", success);
 
@@ -445,7 +445,7 @@ public abstract class AbstractTestCheckAndMutate extends AbstractTest {
                 COLUMN_FAMILY,
                 qualToCheck,
                 CompareOp.NOT_EQUAL,
-                Bytes.toBytes(4000l),
+                Bytes.toBytes(4000L),
                 someRandomPut);
         Assert.assertTrue("4000 != 2000 should succeed", success);
 
@@ -472,10 +472,10 @@ public abstract class AbstractTestCheckAndMutate extends AbstractTest {
 
         table.put(
             new Put(rowKey)
-                .addColumn(COLUMN_FAMILY, popluatedQual, Bytes.toBytes(2000l)));
+                .addColumn(COLUMN_FAMILY, popluatedQual, Bytes.toBytes(2000L)));
 
         Put someRandomPut =
-            new Put(rowKey).addColumn(COLUMN_FAMILY, otherQual, Bytes.toBytes(1l));
+            new Put(rowKey).addColumn(COLUMN_FAMILY, otherQual, Bytes.toBytes(1L));
 
         success =
             checkAndPut(
@@ -542,15 +542,15 @@ public abstract class AbstractTestCheckAndMutate extends AbstractTest {
 
         Table table = getDefaultTable();
         Put someRandomPut =
-            new Put(rowKey).addColumn(COLUMN_FAMILY, otherQual, Bytes.toBytes(1l));
+            new Put(rowKey).addColumn(COLUMN_FAMILY, otherQual, Bytes.toBytes(1L));
 
         table.put(
             new Put(rowKey, System.currentTimeMillis() - 10000)
-                .addColumn(COLUMN_FAMILY, qualToCheck, Bytes.toBytes(2000l)));
+                .addColumn(COLUMN_FAMILY, qualToCheck, Bytes.toBytes(2000L)));
 
         table.put(
             new Put(rowKey, System.currentTimeMillis())
-                .addColumn(COLUMN_FAMILY, qualToCheck, Bytes.toBytes(4000l)));
+                .addColumn(COLUMN_FAMILY, qualToCheck, Bytes.toBytes(4000L)));
 
         success =
             checkAndPut(
@@ -558,7 +558,7 @@ public abstract class AbstractTestCheckAndMutate extends AbstractTest {
                 COLUMN_FAMILY,
                 qualToCheck,
                 CompareOp.GREATER,
-                Bytes.toBytes(3000l),
+                Bytes.toBytes(3000L),
                 someRandomPut);
         Assert.assertFalse("3000 > 4000 should fail", success);
     }

@@ -99,7 +99,7 @@ public class TestSingleColumnValueFilter extends AbstractTest {
     }
 
     private static void checkKey(String key) {
-        Assert.assertNotNull(key + " was incorrectly returned", keys.contains(key));
+        Assert.assertTrue(key + " was incorrectly returned", keys.contains(key));
     }
 
     private static Map<String, Long> getResult(SingleColumnValueFilter filter) throws IOException {

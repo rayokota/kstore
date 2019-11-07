@@ -186,7 +186,7 @@ public class TestBasicOps extends AbstractTest {
         stopwatch.print("close took %d ms");
     }
 
-    private class Stopwatch {
+    private static class Stopwatch {
         long lastCheckin = System.currentTimeMillis();
 
         private void print(String string) {
