@@ -37,6 +37,8 @@
         <guava.version>27.1-jre</guava.version>
         <hbase.version>2.2.1</hbase.version>
         <jackson.version>2.10.0</jackson.version>
+        <kafka.version>2.3.0</kafka.version>
+        <kafka.scala.version>2.12</kafka.scala.version>
         <kcache.version>3.0.0</kcache.version>
         <kryo.version>5.0.0-RC4</kryo.version>
         <sl4j.version>1.7.28</sl4j.version>
@@ -79,6 +81,26 @@
             <version>${sl4j.version}</version>
         </dependency>
         <!-- TESTING -->
+        <dependency>
+            <groupId>org.apache.kafka</groupId>
+            <artifactId>kafka-clients</artifactId>
+            <version>${kafka.version}</version>
+            <classifier>test</classifier>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.kafka</groupId>
+            <artifactId>kafka_${kafka.scala.version}</artifactId>
+            <version>${kafka.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.kafka</groupId>
+            <artifactId>kafka_${kafka.scala.version}</artifactId>
+            <version>${kafka.version}</version>
+            <classifier>test</classifier>
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
