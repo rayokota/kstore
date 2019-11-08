@@ -702,6 +702,8 @@ public abstract class KafkaStoreTable implements Table {
                             }
                         }
                         break;
+                    default:
+                        throw new IllegalArgumentException("Incorrect type " + kv.getType() + " during delete");
                 }
             }
             if (familyData.isEmpty()) {

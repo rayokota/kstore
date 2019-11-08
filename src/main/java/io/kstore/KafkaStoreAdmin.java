@@ -42,9 +42,13 @@ import org.apache.hadoop.hbase.client.ColumnFamilyDescriptor;
 import org.apache.hadoop.hbase.client.CompactType;
 import org.apache.hadoop.hbase.client.CompactionState;
 import org.apache.hadoop.hbase.client.Connection;
+import org.apache.hadoop.hbase.client.Delete;
 import org.apache.hadoop.hbase.client.RegionInfo;
+import org.apache.hadoop.hbase.client.ResultScanner;
+import org.apache.hadoop.hbase.client.Scan;
 import org.apache.hadoop.hbase.client.SnapshotDescription;
 import org.apache.hadoop.hbase.client.SnapshotType;
+import org.apache.hadoop.hbase.client.Table;
 import org.apache.hadoop.hbase.client.TableDescriptor;
 import org.apache.hadoop.hbase.client.TableDescriptorBuilder;
 import org.apache.hadoop.hbase.client.replication.TableCFs;
@@ -850,7 +854,16 @@ public class KafkaStoreAdmin implements Admin {
      */
     @Override
     public void truncateTable(TableName tableName, boolean preserveSplits) throws IOException {
-        throw new UnsupportedOperationException("truncateTable");
+        Table table = conn.getTable(tableName);
+        try (ResultScanner scanner = table.getScanner(new Scan())) {
+            scanner.iterator().forEachRemaining(result -> {
+                try {
+                    table.delete(new Delete(result.getRow()));
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+        }
     }
 
     @Override
