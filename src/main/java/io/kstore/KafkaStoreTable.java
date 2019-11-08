@@ -506,24 +506,18 @@ public abstract class KafkaStoreTable implements Table {
         return getScanner(scan);
     }
 
-    private <K, V> V forceFind(Map<K, V> map, K key, V newObject) {
-        V data = map.putIfAbsent(key, newObject);
-        if (data == null) {
-            data = newObject;
-        }
-        return data;
-    }
-
     /**
      * {@inheritDoc}
      */
     @Override
     public void put(Put put) throws IOException {
         byte[] row = put.getRow();
-        NavigableMap<byte[], NavigableMap<byte[], NavigableMap<Long, byte[]>>> rowData = forceFind(data, row, new TreeMap<>(Bytes.BYTES_COMPARATOR));
+        NavigableMap<byte[], NavigableMap<byte[], NavigableMap<Long, byte[]>>> rowData =
+            data.computeIfAbsent(row, k -> new TreeMap<>(Bytes.BYTES_COMPARATOR));
         for (Map.Entry<byte[], List<Cell>> entry : put.getFamilyCellMap().entrySet()) {
             byte[] family = entry.getKey();
-            NavigableMap<byte[], NavigableMap<Long, byte[]>> familyData = forceFind(rowData, family, new TreeMap<>(Bytes.BYTES_COMPARATOR));
+            NavigableMap<byte[], NavigableMap<Long, byte[]>> familyData =
+                rowData.computeIfAbsent(family, k -> new TreeMap<>(Bytes.BYTES_COMPARATOR));
             for (Cell kv : entry.getValue()) {
                 long ts = kv.getTimestamp();
                 if (ts == HConstants.LATEST_TIMESTAMP) {
@@ -533,7 +527,7 @@ public abstract class KafkaStoreTable implements Table {
                     ts = System.currentTimeMillis();
                 }
                 byte[] qualifier = CellUtil.cloneQualifier(kv);
-                NavigableMap<Long, byte[]> qualifierData = forceFind(familyData, qualifier, new TreeMap<>());
+                NavigableMap<Long, byte[]> qualifierData = familyData.computeIfAbsent(qualifier, k -> new TreeMap<>());
                 qualifierData.put(ts, CellUtil.cloneValue(kv));
             }
         }

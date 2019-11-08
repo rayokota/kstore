@@ -255,7 +255,7 @@ public class KafkaStoreAdmin implements Admin {
             }
         }
 
-        return result.toArray(new TableName[result.size()]);
+        return result.toArray(new TableName[0]);
     }
 
     /**
@@ -447,7 +447,7 @@ public class KafkaStoreAdmin implements Admin {
                 failed.add(table);
             }
         }
-        return failed.toArray(new HTableDescriptor[failed.size()]);
+        return failed.toArray(new HTableDescriptor[0]);
     }
 
     @Override
@@ -807,7 +807,7 @@ public class KafkaStoreAdmin implements Admin {
     @Override
     public HTableDescriptor[] getTableDescriptorsByTableName(List<TableName> tableNames)
         throws IOException {
-        TableName[] tableNameArray = tableNames.toArray(new TableName[tableNames.size()]);
+        TableName[] tableNameArray = tableNames.toArray(new TableName[0]);
         return getTableDescriptors(tableNameArray);
     }
 
@@ -1094,11 +1094,7 @@ public class KafkaStoreAdmin implements Admin {
 
     @Override
     public List<RegionInfo> getRegions(TableName tableName) throws IOException {
-        List<RegionInfo> regionInfo = new ArrayList<>();
-        for (HRegionInfo hRegionInfo : getTableRegions(tableName)) {
-            regionInfo.add(hRegionInfo);
-        }
-        return regionInfo;
+        return new ArrayList<>(getTableRegions(tableName));
     }
 
     @Override
