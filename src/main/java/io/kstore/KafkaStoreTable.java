@@ -25,6 +25,7 @@ import org.apache.hadoop.hbase.CellUtil;
 import org.apache.hadoop.hbase.CompareOperator;
 import org.apache.hadoop.hbase.HConstants;
 import org.apache.hadoop.hbase.HRegionLocation;
+import org.apache.hadoop.hbase.HTableDescriptor;
 import org.apache.hadoop.hbase.KeyValue;
 import org.apache.hadoop.hbase.ServerName;
 import org.apache.hadoop.hbase.TableName;
@@ -100,6 +101,15 @@ public abstract class KafkaStoreTable implements Table {
     @Override
     public Configuration getConfiguration() {
         return conn.getConfiguration();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public HTableDescriptor getTableDescriptor() throws IOException {
+        TableDescriptor descriptor = this.getDescriptor();
+        return descriptor instanceof HTableDescriptor ? (HTableDescriptor)descriptor : new HTableDescriptor(descriptor);
     }
 
     /**
