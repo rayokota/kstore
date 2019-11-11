@@ -53,6 +53,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 
 import static io.kstore.Constants.DEFAULT_FAMILY_BYTES;
+import static io.kstore.Constants.KAFKASTORE_TOPIC_DEFAULT;
 
 public class KafkaStoreConnection implements Connection {
 
@@ -73,7 +74,7 @@ public class KafkaStoreConnection implements Connection {
     public KafkaStoreConnection(Configuration config, ExecutorService pool, User user) {
         this.config = config;
         Map<String, String> configs = new HashMap<>(config.getValByRegex("kafkacache.*"));
-        String topic = "_tables";
+        String topic = config.get(Constants.KAFKASTORE_TOPIC_CONFIG, KAFKASTORE_TOPIC_DEFAULT);
         String groupId = config.get(KafkaCacheConfig.KAFKACACHE_GROUP_ID_CONFIG, "kstore-1");
         String clientId = config.get(KafkaCacheConfig.KAFKACACHE_CLIENT_ID_CONFIG, groupId + "-" + topic);
         configs.put(KafkaCacheConfig.KAFKACACHE_TOPIC_CONFIG, topic);
