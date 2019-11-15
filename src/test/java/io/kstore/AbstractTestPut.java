@@ -88,6 +88,7 @@ public abstract class AbstractTestPut extends AbstractTest {
      *
      * @throws IOException
      */
+    @Test
     public void testPutGetDeleteMultipleRows() throws IOException {
         // Initialize interface
         Table table = getDefaultTable();
@@ -128,7 +129,7 @@ public abstract class AbstractTestPut extends AbstractTest {
             Assert.assertEquals(descriptor, 1, result[i].size());
             Assert.assertTrue(
                 descriptor, result[i].containsNonEmptyColumn(COLUMN_FAMILY, entry.qualifier));
-            Assert.assertEquals(
+            Assert.assertArrayEquals(
                 descriptor,
                 entry.value,
                 CellUtil.cloneValue(result[i].getColumnCells(COLUMN_FAMILY, entry.qualifier).get(0)));
