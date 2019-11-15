@@ -405,6 +405,7 @@ public abstract class KafkaStoreTable implements Table {
                 break;
             }
         }
+        iter.close();
 
         return new ResultScanner() {
             private final Iterator<Result> iterator = ret.iterator();
