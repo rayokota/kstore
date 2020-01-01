@@ -61,7 +61,6 @@ public class KafkaTableCache implements Closeable {
         configs.put(KafkaCacheConfig.KAFKACACHE_TOPIC_CONFIG, topic);
         configs.put(KafkaCacheConfig.KAFKACACHE_GROUP_ID_CONFIG, groupId);
         configs.put(KafkaCacheConfig.KAFKACACHE_CLIENT_ID_CONFIG, clientId);
-        configs.put(KafkaCacheConfig.KAFKACACHE_ENABLE_OFFSET_COMMIT_CONFIG, "true");
         String enableRocksDbStr = config.get(ROCKS_DB_ENABLE_CONFIG, "true");
         boolean enableRocksDb = Boolean.parseBoolean(enableRocksDbStr);
         String rootDir = config.get(ROCKS_DB_ROOT_DIR_CONFIG, ROCKS_DB_ROOT_DIR_DEFAULT);
