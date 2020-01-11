@@ -1993,7 +1993,7 @@ public class KafkaStoreAdmin implements Admin {
     }
 
     private boolean provideWarningsForNamespaces() {
-        return false;
+        return true;
     }
 
     /**
