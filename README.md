@@ -45,4 +45,4 @@ KStore can be used by configuring the value for `hbase.client.connection.impl` i
 Internally KStore uses [KCache](https://github.com/rayokota/kcache) and so all the configuration properties of KCache can be used.  See the [KCache documentation](https://github.com/rayokota/kcache#basic-configuration) for further details.
 
 
-See this post for more examples of how to use KStore.
+See [this post](https://yokota.blog/2020/01/13/building-a-graph-database-using-kafka/) for more examples of how to use KStore.
