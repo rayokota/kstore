@@ -344,18 +344,20 @@ public class KafkaStoreConnection implements Connection {
 
     private class TableUpdateHandler implements CacheUpdateHandler<KafkaSchemaKey, KafkaSchemaValue> {
         @Override
-        public void handleUpdate(KafkaSchemaKey kafkaSchemaKey, KafkaSchemaValue kafkaSchemaValue) {
-            TableName tableName = TableName.valueOf(kafkaSchemaKey.getTableName());
+        public void handleUpdate(KafkaSchemaKey schemaKey,
+                                 KafkaSchemaValue schemaValue,
+                                 KafkaSchemaValue oldSchemaValue) {
+            TableName tableName = TableName.valueOf(schemaKey.getTableName());
             KafkaStoreTable table;
-            switch (kafkaSchemaValue.getAction()) {
+            switch (schemaValue.getAction()) {
                 case CREATE:
-                    table = new KafkaStoreTxTable(config, KafkaStoreConnection.this, kafkaSchemaValue);
+                    table = new KafkaStoreTxTable(config, KafkaStoreConnection.this, schemaValue);
                     tables.put(tableName, table);
                     LOG.info("Created table: {}", tableName);
                     break;
                 case ALTER:
                     table = tables.get(tableName);
-                    table.getCache().setSchemaValue(kafkaSchemaValue);
+                    table.getCache().setSchemaValue(schemaValue);
                     LOG.info("Modified table: {}", tableName);
                     break;
                 case DROP:
