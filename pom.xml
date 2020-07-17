@@ -40,7 +40,7 @@
         <kafka.version>2.4.1</kafka.version>
         <kafka.scala.version>2.12</kafka.scala.version>
         <kcache.version>3.1.2</kcache.version>
-        <kryo.version>5.0.0-RC6</kryo.version>
+        <kryo.version>5.0.0-RC7</kryo.version>
         <sl4j.version>1.7.30</sl4j.version>
     </properties>
 
