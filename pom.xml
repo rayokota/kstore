@@ -35,11 +35,11 @@
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <guava.version>29.0-jre</guava.version>
-        <hbase.version>2.2.4</hbase.version>
+        <hbase.version>2.3.0</hbase.version>
         <jackson.version>2.11.1</jackson.version>
-        <kafka.version>2.4.1</kafka.version>
-        <kafka.scala.version>2.12</kafka.scala.version>
-        <kcache.version>3.1.2</kcache.version>
+        <kafka.version>2.6.0</kafka.version>
+        <kafka.scala.version>2.13</kafka.scala.version>
+        <kcache.version>3.2.0</kcache.version>
         <kryo.version>5.0.0-RC7</kryo.version>
         <sl4j.version>1.7.30</sl4j.version>
     </properties>
