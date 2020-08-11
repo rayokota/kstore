@@ -43,6 +43,8 @@ import org.apache.hadoop.hbase.client.CompactType;
 import org.apache.hadoop.hbase.client.CompactionState;
 import org.apache.hadoop.hbase.client.Connection;
 import org.apache.hadoop.hbase.client.Delete;
+import org.apache.hadoop.hbase.client.LogQueryFilter;
+import org.apache.hadoop.hbase.client.OnlineLogRecord;
 import org.apache.hadoop.hbase.client.RegionInfo;
 import org.apache.hadoop.hbase.client.ResultScanner;
 import org.apache.hadoop.hbase.client.Scan;
@@ -833,6 +835,11 @@ public class KafkaStoreAdmin implements Admin {
         throw new UnsupportedOperationException("getOperationTimeout");
     }
 
+    @Override
+    public int getSyncWaitTimeout() {
+        throw new UnsupportedOperationException("getSyncWaitTimeout");
+    }
+
     /**
      * {@inheritDoc}
      */
@@ -925,7 +932,7 @@ public class KafkaStoreAdmin implements Admin {
     }
 
     @Override
-    public Future<Void> cloneSnapshotAsync(String arg0, TableName arg1)
+    public Future<Void> cloneSnapshotAsync(String arg0, TableName arg1, boolean arg2)
         throws IOException, TableExistsException {
         throw new UnsupportedOperationException("cloneSnapshotAsync");
     }
@@ -1446,7 +1453,7 @@ public class KafkaStoreAdmin implements Admin {
      * {@inheritDoc}
      */
     @Override
-    public void snapshotAsync(SnapshotDescription snapshot)
+    public Future<Void> snapshotAsync(SnapshotDescription snapshot)
         throws IOException, SnapshotCreationException {
         throw new UnsupportedOperationException("snapshotAsync");
     }
@@ -1946,6 +1953,16 @@ public class KafkaStoreAdmin implements Admin {
         }
     }
 
+    @Override
+    public String[] listNamespaces() throws IOException {
+        if (provideWarningsForNamespaces()) {
+            LOG.warn("listNamespaces is a no-op");
+            return new String[0];
+        } else {
+            throw new UnsupportedOperationException("listNamespaces");
+        }
+    }
+
     /**
      * {@inheritDoc}
      */
@@ -2077,5 +2094,25 @@ public class KafkaStoreAdmin implements Admin {
     @Override
     public void rollWALWriter(ServerName serverName) throws IOException, FailedLogCloseException {
         throw new UnsupportedOperationException("rollWALWriter");
+    }
+
+    @Override
+    public boolean snapshotCleanupSwitch(boolean var1, boolean var2) throws IOException {
+        throw new UnsupportedOperationException("snapshotCleanupSwitch");
+    }
+
+    @Override
+    public boolean isSnapshotCleanupEnabled() throws IOException {
+        throw new UnsupportedOperationException("isSnapshotCleanupEnabled");
+    }
+
+    @Override
+    public List<OnlineLogRecord> getSlowLogResponses(Set<ServerName> var1, LogQueryFilter var2) throws IOException {
+        throw new UnsupportedOperationException("getSlowLogResponses");
+    }
+
+    @Override
+    public List<Boolean> clearSlowLogResponses(Set<ServerName> var1) throws IOException {
+        throw new UnsupportedOperationException("clearSlowLogResponses");
     }
 }

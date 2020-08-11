@@ -40,6 +40,7 @@ import org.apache.hadoop.hbase.client.Table;
 import org.apache.hadoop.hbase.client.TableBuilder;
 import org.apache.hadoop.hbase.client.TableDescriptorBuilder;
 import org.apache.hadoop.hbase.security.User;
+import org.apache.kafka.common.TopicPartition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -346,7 +347,10 @@ public class KafkaStoreConnection implements Connection {
         @Override
         public void handleUpdate(KafkaSchemaKey schemaKey,
                                  KafkaSchemaValue schemaValue,
-                                 KafkaSchemaValue oldSchemaValue) {
+                                 KafkaSchemaValue oldSchemaValue,
+                                 TopicPartition tp,
+                                 long offset,
+                                 long timestamp) {
             TableName tableName = TableName.valueOf(schemaKey.getTableName());
             KafkaStoreTable table;
             switch (schemaValue.getAction()) {
