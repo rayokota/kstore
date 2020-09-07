@@ -345,67 +345,73 @@ public abstract class KafkaStoreTable implements Table {
             subData = subData.subCache(st, scan.includeStartRow(), sp, includeStopRow);
         }
 
-        KeyValueIterator<byte[], NavigableMap<byte[], NavigableMap<byte[], NavigableMap<Long, byte[]>>>> iter = subData.all();
-        while (iter.hasNext()) {
-            io.kcache.KeyValue<byte[], NavigableMap<byte[], NavigableMap<byte[], NavigableMap<Long, byte[]>>>> entry = iter.next();
-            byte[] row = entry.key;
-            NavigableMap<byte[], NavigableMap<byte[], NavigableMap<Long, byte[]>>> rowData = entry.value;
-            List<Cell> kvs;
-            if (!scan.hasFamilies()) {
-                kvs = toKeyValue(row, rowData, scan.getTimeRange(), scan.getColumnFamilyTimeRange(), scan.getMaxVersions());
-                if (filter != null) {
-                    kvs = filter(filter, kvs);
-                }
-                if (maxResults >= 0 && kvs.size() > maxResults) {
-                    kvs = kvs.subList(0, maxResults);
-                }
-            } else {
-                kvs = new ArrayList<>();
-                for (Map.Entry<byte[], NavigableSet<byte[]>> innerEntry : scan.getFamilyMap().entrySet()) {
-                    byte[] family = innerEntry.getKey();
-                    NavigableMap<byte[], NavigableMap<Long, byte[]>> familyData = rowData.get(family);
-                    if (familyData == null)
-                        continue;
-                    NavigableSet<byte[]> qualifiers = innerEntry.getValue();
-                    if (qualifiers == null || qualifiers.isEmpty())
-                        qualifiers = familyData.navigableKeySet();
-                    List<Cell> familyKvs = new ArrayList<>();
-                    TimeRange familyTimeRange = scan.getColumnFamilyTimeRange().get(family);
-                    if (familyTimeRange == null) familyTimeRange = scan.getTimeRange();
-                    for (byte[] qualifier : qualifiers) {
-                        if (familyData.get(qualifier) == null)
-                            continue;
-                        List<KeyValue> tsKvs = new ArrayList<>();
-                        for (Map.Entry<Long, byte[]> innerMostEntry : familyData.get(qualifier).descendingMap().entrySet()) {
-                            Long timestamp = innerMostEntry.getKey();
-                            if (!familyTimeRange.withinTimeRange(timestamp))
-                                continue;
-                            byte[] value = innerMostEntry.getValue();
-                            tsKvs.add(new KeyValue(row, family, qualifier, timestamp, value));
-                            if (tsKvs.size() == scan.getMaxVersions()) {
-                                break;
-                            }
-                        }
-                        familyKvs.addAll(tsKvs);
-                    }
+        try (KeyValueIterator<byte[], NavigableMap<byte[], NavigableMap<byte[], NavigableMap<Long, byte[]>>>> iter = subData.all()) {
+            while (iter.hasNext()) {
+                io.kcache.KeyValue<byte[], NavigableMap<byte[], NavigableMap<byte[], NavigableMap<Long, byte[]>>>> entry = iter
+                    .next();
+                byte[] row = entry.key;
+                NavigableMap<byte[], NavigableMap<byte[], NavigableMap<Long, byte[]>>> rowData = entry.value;
+                List<Cell> kvs;
+                if (!scan.hasFamilies()) {
+                    kvs = toKeyValue(row, rowData, scan.getTimeRange(),
+                        scan.getColumnFamilyTimeRange(), scan.getMaxVersions());
                     if (filter != null) {
-                        familyKvs = filter(filter, familyKvs);
+                        kvs = filter(filter, kvs);
                     }
-                    if (maxResults >= 0 && familyKvs.size() > maxResults) {
-                        familyKvs = familyKvs.subList(0, maxResults);
+                    if (maxResults >= 0 && kvs.size() > maxResults) {
+                        kvs = kvs.subList(0, maxResults);
                     }
-                    kvs.addAll(familyKvs);
+                } else {
+                    kvs = new ArrayList<>();
+                    for (Map.Entry<byte[], NavigableSet<byte[]>> innerEntry : scan.getFamilyMap()
+                        .entrySet()) {
+                        byte[] family = innerEntry.getKey();
+                        NavigableMap<byte[], NavigableMap<Long, byte[]>> familyData = rowData
+                            .get(family);
+                        if (familyData == null)
+                            continue;
+                        NavigableSet<byte[]> qualifiers = innerEntry.getValue();
+                        if (qualifiers == null || qualifiers.isEmpty())
+                            qualifiers = familyData.navigableKeySet();
+                        List<Cell> familyKvs = new ArrayList<>();
+                        TimeRange familyTimeRange = scan.getColumnFamilyTimeRange().get(family);
+                        if (familyTimeRange == null)
+                            familyTimeRange = scan.getTimeRange();
+                        for (byte[] qualifier : qualifiers) {
+                            if (familyData.get(qualifier) == null)
+                                continue;
+                            List<KeyValue> tsKvs = new ArrayList<>();
+                            for (Map.Entry<Long, byte[]> innerMostEntry : familyData.get(qualifier)
+                                .descendingMap().entrySet()) {
+                                Long timestamp = innerMostEntry.getKey();
+                                if (!familyTimeRange.withinTimeRange(timestamp))
+                                    continue;
+                                byte[] value = innerMostEntry.getValue();
+                                tsKvs.add(new KeyValue(row, family, qualifier, timestamp, value));
+                                if (tsKvs.size() == scan.getMaxVersions()) {
+                                    break;
+                                }
+                            }
+                            familyKvs.addAll(tsKvs);
+                        }
+                        if (filter != null) {
+                            familyKvs = filter(filter, familyKvs);
+                        }
+                        if (maxResults >= 0 && familyKvs.size() > maxResults) {
+                            familyKvs = familyKvs.subList(0, maxResults);
+                        }
+                        kvs.addAll(familyKvs);
+                    }
                 }
-            }
-            if (!kvs.isEmpty()) {
-                ret.add(Result.create(kvs));
-            }
-            // Check for early out optimization
-            if (filter != null && filter.filterAllRemaining()) {
-                break;
+                if (!kvs.isEmpty()) {
+                    ret.add(Result.create(kvs));
+                }
+                // Check for early out optimization
+                if (filter != null && filter.filterAllRemaining()) {
+                    break;
+                }
             }
         }
-        iter.close();
 
         return new ResultScanner() {
             private final Iterator<Result> iterator = ret.iterator();
