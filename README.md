@@ -21,7 +21,7 @@ Releases of KStore are deployed to Maven Central.
 <dependency>
     <groupId>io.kstore</groupId>
     <artifactId>kstore</artifactId>
-    <version>0.1.1</version>
+    <version>1.0.0</version>
 </dependency>
 ```
 
