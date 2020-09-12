@@ -39,7 +39,7 @@
         <jackson.version>2.11.1</jackson.version>
         <kafka.version>2.6.0</kafka.version>
         <kafka.scala.version>2.13</kafka.scala.version>
-        <kcache.version>3.2.1</kcache.version>
+        <kcache.version>3.3.1</kcache.version>
         <kryo.version>5.0.0-RC7</kryo.version>
         <sl4j.version>1.7.30</sl4j.version>
     </properties>
@@ -53,6 +53,26 @@
         <dependency>
             <groupId>io.kcache</groupId>
             <artifactId>kcache</artifactId>
+            <version>${kcache.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.kcache</groupId>
+            <artifactId>kcache-bdbje</artifactId>
+            <version>${kcache.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.kcache</groupId>
+            <artifactId>kcache-lmdb</artifactId>
+            <version>${kcache.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.kcache</groupId>
+            <artifactId>kcache-mapdb</artifactId>
+            <version>${kcache.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.kcache</groupId>
+            <artifactId>kcache-rocksdb</artifactId>
             <version>${kcache.version}</version>
         </dependency>
         <dependency>

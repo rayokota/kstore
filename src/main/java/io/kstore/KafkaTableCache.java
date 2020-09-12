@@ -19,8 +19,6 @@ package io.kstore;
 import io.kcache.Cache;
 import io.kcache.KafkaCache;
 import io.kcache.KafkaCacheConfig;
-import io.kcache.utils.InMemoryCache;
-import io.kcache.utils.rocksdb.RocksDBCache;
 import io.kstore.schema.KafkaSchemaValue;
 import io.kstore.serialization.KryoSerde;
 import org.apache.hadoop.conf.Configuration;
@@ -36,11 +34,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.NavigableMap;
-import java.util.concurrent.ConcurrentSkipListMap;
-
-import static io.kstore.Constants.ROCKS_DB_ENABLE_CONFIG;
-import static io.kstore.Constants.ROCKS_DB_ROOT_DIR_CONFIG;
-import static io.kstore.Constants.ROCKS_DB_ROOT_DIR_DEFAULT;
 
 public class KafkaTableCache implements Closeable {
     private static final Logger LOG = LoggerFactory.getLogger(KafkaTableCache.class);
@@ -61,15 +54,9 @@ public class KafkaTableCache implements Closeable {
         configs.put(KafkaCacheConfig.KAFKACACHE_TOPIC_CONFIG, topic);
         configs.put(KafkaCacheConfig.KAFKACACHE_GROUP_ID_CONFIG, groupId);
         configs.put(KafkaCacheConfig.KAFKACACHE_CLIENT_ID_CONFIG, clientId);
-        String enableRocksDbStr = config.get(ROCKS_DB_ENABLE_CONFIG, "true");
-        boolean enableRocksDb = Boolean.parseBoolean(enableRocksDbStr);
-        String rootDir = config.get(ROCKS_DB_ROOT_DIR_CONFIG, ROCKS_DB_ROOT_DIR_DEFAULT);
         Comparator<byte[]> cmp = Bytes.BYTES_COMPARATOR;
-        Cache<byte[], NavigableMap<byte[], NavigableMap<byte[], NavigableMap<Long, byte[]>>>> cache = enableRocksDb
-            ? new RocksDBCache<>(topic, "rocksdb", rootDir, Serdes.ByteArray(), new KryoSerde<>(), cmp)
-            : new InMemoryCache<>(new ConcurrentSkipListMap<>(cmp));
         Cache<byte[], NavigableMap<byte[], NavigableMap<byte[], NavigableMap<Long, byte[]>>>> rowMap = new KafkaCache<>(
-            new KafkaCacheConfig(configs), Serdes.ByteArray(), new KryoSerde<>(), null, cache);
+            new KafkaCacheConfig(configs), Serdes.ByteArray(), new KryoSerde<>(), null, topic, cmp);
         this.rows = rowMap;
     }
 
