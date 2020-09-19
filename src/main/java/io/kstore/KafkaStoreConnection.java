@@ -21,6 +21,7 @@ import io.kcache.Cache;
 import io.kcache.CacheUpdateHandler;
 import io.kcache.KafkaCache;
 import io.kcache.KafkaCacheConfig;
+import io.kcache.KeyValueIterator;
 import io.kcache.utils.Caches;
 import io.kcache.utils.InMemoryCache;
 import io.kcache.utils.Streams;
@@ -106,10 +107,12 @@ public class KafkaStoreConnection implements Connection {
     public KafkaSchemaValue getLatestSchemaValue(TableName tableName) {
         KafkaSchemaKey key1 = new KafkaSchemaKey(tableName.getNameAsString(), MIN_VERSION);
         KafkaSchemaKey key2 = new KafkaSchemaKey(tableName.getNameAsString(), MAX_VERSION);
-        return Streams.streamOf(schemas.range(key1, true, key2, false))
-            .reduce((e1, e2) -> e2)
-            .map(kv -> kv.value)
-            .orElse(null);
+        try (KeyValueIterator<KafkaSchemaKey, KafkaSchemaValue> iter = schemas.range(key1, true, key2, false)) {
+            return Streams.streamOf(iter)
+                .reduce((e1, e2) -> e2)
+                .map(kv -> kv.value)
+                .orElse(null);
+        }
     }
 
     /**

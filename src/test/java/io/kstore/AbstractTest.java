@@ -26,7 +26,8 @@ import org.junit.Before;
 
 import java.io.IOException;
 import java.util.Random;
-import java.util.UUID;
+import org.junit.Rule;
+import org.junit.rules.TemporaryFolder;
 
 public abstract class AbstractTest extends ClusterTestHarness {
 
@@ -40,13 +41,16 @@ public abstract class AbstractTest extends ClusterTestHarness {
     private Connection conn;
     private TableName defaultTableName;
 
+    @Rule
+    public final TemporaryFolder dir = new TemporaryFolder();
+
     @Before
     public void setUp() throws Exception {
         super.setUp();
         config = new Configuration();
         config.set("kafkacache.bootstrap.servers", bootstrapServers);
-        config.set("rocksdb.enable", "false");
-        config.set("rocksdb.root.dir", "/tmp/rocksdb_" + UUID.randomUUID());
+        config.set("kafkacache.backing.cache", "rocksdb");
+        config.set("kafkacache.data.dir", dir.getRoot().toString());
         conn = new KafkaStoreConnection(config);
         defaultTableName = newTestTableName();
     }

@@ -3,7 +3,7 @@
 
     <groupId>io.kstore</groupId>
     <artifactId>kstore</artifactId>
-    <version>0.1.3-SNAPSHOT</version>
+    <version>1.0.1-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>kstore</name>
@@ -35,12 +35,12 @@
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <guava.version>29.0-jre</guava.version>
-        <hbase.version>2.3.0</hbase.version>
+        <hbase.version>2.3.1</hbase.version>
         <jackson.version>2.11.2</jackson.version>
         <kafka.version>2.6.0</kafka.version>
         <kafka.scala.version>2.13</kafka.scala.version>
-        <kcache.version>3.2.1</kcache.version>
-        <kryo.version>5.0.0-RC7</kryo.version>
+        <kcache.version>3.3.1</kcache.version>
+        <kryo.version>5.0.0-RC9</kryo.version>
         <sl4j.version>1.7.30</sl4j.version>
     </properties>
 
@@ -53,6 +53,26 @@
         <dependency>
             <groupId>io.kcache</groupId>
             <artifactId>kcache</artifactId>
+            <version>${kcache.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.kcache</groupId>
+            <artifactId>kcache-bdbje</artifactId>
+            <version>${kcache.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.kcache</groupId>
+            <artifactId>kcache-lmdb</artifactId>
+            <version>${kcache.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.kcache</groupId>
+            <artifactId>kcache-mapdb</artifactId>
+            <version>${kcache.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.kcache</groupId>
+            <artifactId>kcache-rocksdb</artifactId>
             <version>${kcache.version}</version>
         </dependency>
         <dependency>
