@@ -4,7 +4,7 @@
 [![Maven][maven-shield]][maven-link]
 [![Javadoc][javadoc-shield]][javadoc-link]
 
-[github-actions-shield]: https://github.com/rayokota/kstore/workflows/build/badge.svg
+[github-actions-shield]: https://github.com/rayokota/kstore/workflows/build/badge.svg?branch=master
 [github-actions-link]: https://github.com/rayokota/kstore/actions
 [maven-shield]: https://img.shields.io/maven-central/v/io.kstore/kstore.svg
 [maven-link]: https://search.maven.org/#search%7Cga%7C1%7Cio.kstore
