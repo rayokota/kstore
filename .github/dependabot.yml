@@ -1,0 +1,60 @@
+version: 2
+updates:
+- package-ecosystem: maven
+  directory: "/"
+  schedule:
+    interval: daily
+  open-pull-requests-limit: 10
+  ignore:
+  - dependency-name: com.github.spotbugs:spotbugs-maven-plugin
+    versions:
+    - 4.2.2
+  - dependency-name: com.esotericsoftware:kryo
+    versions:
+    - 5.0.4
+  - dependency-name: io.kcache:kcache-rocksdb
+    versions:
+    - 3.4.0
+    - 3.4.1
+    - 3.4.2
+  - dependency-name: io.kcache:kcache-mapdb
+    versions:
+    - 3.4.0
+    - 3.4.1
+    - 3.4.2
+  - dependency-name: io.kcache:kcache-lmdb
+    versions:
+    - 3.4.0
+    - 3.4.1
+    - 3.4.2
+  - dependency-name: io.kcache:kcache-bdbje
+    versions:
+    - 3.4.0
+    - 3.4.1
+    - 3.4.2
+  - dependency-name: io.kcache:kcache
+    versions:
+    - 3.4.0
+    - 3.4.1
+    - 3.4.2
+  - dependency-name: org.apache.kafka:kafka_2.13:test
+    versions:
+    - 2.7.0
+  - dependency-name: org.apache.kafka:kafka_2.13
+    versions:
+    - 2.7.0
+  - dependency-name: org.apache.kafka:kafka-clients:test
+    versions:
+    - 2.7.0
+  - dependency-name: org.apache.hbase:hbase-client
+    versions:
+    - 2.4.1
+  - dependency-name: com.fasterxml.jackson.core:jackson-databind
+    versions:
+    - 2.12.1
+  - dependency-name: com.fasterxml.jackson.core:jackson-annotations
+    versions:
+    - 2.12.1
+  - dependency-name: junit:junit
+    versions:
+    - 4.13.1
