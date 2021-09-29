@@ -3,7 +3,7 @@
 
     <groupId>io.kstore</groupId>
     <artifactId>kstore</artifactId>
-    <version>1.0.2-SNAPSHOT</version>
+    <version>2.0.0</version>
     <packaging>jar</packaging>
 
     <name>kstore</name>
@@ -27,7 +27,7 @@
         <connection>scm:git:git://github.com:rayokota/kstore.git</connection>
         <developerConnection>scm:git:git@github.com:rayokota/kstore.git</developerConnection>
         <url>git@github.com:rayokota/kstore.git</url>
-        <tag>HEAD</tag>
+        <tag>kstore-2.0.0</tag>
     </scm>
 
     <properties>
