@@ -35,7 +35,7 @@
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <guava.version>31.1-jre</guava.version>
-        <hbase.version>2.3.1</hbase.version>
+        <hbase.version>2.5.3-hadoop3</hbase.version>
         <jackson.version>2.14.2</jackson.version>
         <kafka.version>3.3.2</kafka.version>
         <kafka.scala.version>2.13</kafka.scala.version>
