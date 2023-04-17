@@ -42,12 +42,12 @@ public class KafkaStoreTxTable extends KafkaStoreTable {
      * {@inheritDoc}
      */
     @Override
-    public void mutateRow(RowMutations rm) throws IOException {
+    public Result mutateRow(RowMutations rm) throws IOException {
         byte[] row = rm.getRow();
         Lock lock = striped.get(new Bytes(row)).writeLock();
         lock.lock();
         try {
-            super.mutateRow(rm);
+            return super.mutateRow(rm);
         } finally {
             lock.unlock();
         }
