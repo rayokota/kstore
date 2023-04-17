@@ -124,18 +124,32 @@ public abstract class KafkaStoreTable implements Table {
      * {@inheritDoc}
      */
     @Override
-    public void mutateRow(RowMutations rm) throws IOException {
+    public Result mutateRow(RowMutations rm) throws IOException {
+        List<Result> results = new ArrayList<>();
         for (Mutation mutation : rm.getMutations()) {
             if (mutation instanceof Put) {
                 put((Put) mutation);
             } else if (mutation instanceof Delete) {
                 delete((Delete) mutation);
             } else if (mutation instanceof Increment) {
-                increment((Increment) mutation);
+                results.add(increment((Increment) mutation));
             } else if (mutation instanceof Append) {
-                append((Append) mutation);
+                results.add(append((Append) mutation));
             }
         }
+
+        if (results.isEmpty()) {
+            return null;
+        }
+
+        // Merge the results of the Increment/Append operations
+        List<Cell> cells = new ArrayList<>();
+        for (Result result : results) {
+            if (result.rawCells() != null) {
+                cells.addAll(Arrays.asList(result.rawCells()));
+            }
+        }
+        return Result.create(cells);
     }
 
     /**

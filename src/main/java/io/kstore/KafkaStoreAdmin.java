@@ -38,16 +38,21 @@ import org.apache.hadoop.hbase.TableNotEnabledException;
 import org.apache.hadoop.hbase.TableNotFoundException;
 import org.apache.hadoop.hbase.ZooKeeperConnectionException;
 import org.apache.hadoop.hbase.client.Admin;
+import org.apache.hadoop.hbase.client.BalanceRequest;
+import org.apache.hadoop.hbase.client.BalanceResponse;
 import org.apache.hadoop.hbase.client.ColumnFamilyDescriptor;
 import org.apache.hadoop.hbase.client.CompactType;
 import org.apache.hadoop.hbase.client.CompactionState;
 import org.apache.hadoop.hbase.client.Connection;
 import org.apache.hadoop.hbase.client.Delete;
+import org.apache.hadoop.hbase.client.LogEntry;
 import org.apache.hadoop.hbase.client.LogQueryFilter;
+import org.apache.hadoop.hbase.client.NormalizeTableFilterParams;
 import org.apache.hadoop.hbase.client.OnlineLogRecord;
 import org.apache.hadoop.hbase.client.RegionInfo;
 import org.apache.hadoop.hbase.client.ResultScanner;
 import org.apache.hadoop.hbase.client.Scan;
+import org.apache.hadoop.hbase.client.ServerType;
 import org.apache.hadoop.hbase.client.SnapshotDescription;
 import org.apache.hadoop.hbase.client.SnapshotType;
 import org.apache.hadoop.hbase.client.Table;
@@ -485,6 +490,13 @@ public class KafkaStoreAdmin implements Admin {
         throw new UnsupportedOperationException("modifyTableAsync");
     }
 
+    @Override
+    public Future<Void> modifyTableStoreFileTrackerAsync(TableName tableName, String dstSFT)
+        throws IOException {
+        throw new UnsupportedOperationException("modifyTableStoreFileTrackerAsync");
+
+    }
+
     /**
      * {@inheritDoc}
      */
@@ -766,6 +778,12 @@ public class KafkaStoreAdmin implements Admin {
         throw new UnsupportedOperationException("modifyColumnFamilyAsync");
     }
 
+    @Override
+    public Future<Void> modifyColumnFamilyStoreFileTrackerAsync(TableName tableName, byte[] family,
+        String dstSFT) throws IOException {
+        throw new UnsupportedOperationException("modifyColumnFamilyStoreFileTrackerAsync");
+    }
+
     /**
      * {@inheritDoc}
      */
@@ -895,7 +913,12 @@ public class KafkaStoreAdmin implements Admin {
     }
 
     @Override
-    public boolean balance(boolean arg0) throws IOException {
+    public BalanceResponse balance(BalanceRequest request) throws IOException {
+        throw new UnsupportedOperationException("balance");
+    }
+
+    @Override
+    public boolean balance(boolean force) throws IOException {
         throw new UnsupportedOperationException("balance");
     }
 
@@ -1190,6 +1213,11 @@ public class KafkaStoreAdmin implements Admin {
 
     @Override
     public boolean normalize() throws IOException {
+        throw new UnsupportedOperationException("normalize");
+    }
+
+    @Override
+    public boolean normalize(NormalizeTableFilterParams nftp) throws IOException {
         throw new UnsupportedOperationException("normalize");
     }
 
@@ -1682,11 +1710,21 @@ public class KafkaStoreAdmin implements Admin {
         throw new UnsupportedOperationException("flush");
     }
 
+    @Override
+    public void flush(TableName tableName, byte[] columnFamily) throws IOException {
+        throw new UnsupportedOperationException("flush");
+    }
+
     /**
      * {@inheritDoc}
      */
     @Override
     public void flushRegion(byte[] bytes) throws IOException {
+        LOG.info("flushRegion is a no-op");
+    }
+
+    @Override
+    public void flushRegion(byte[] bytes, byte[] columnFamily) throws IOException {
         LOG.info("flushRegion is a no-op");
     }
 
@@ -1778,6 +1816,12 @@ public class KafkaStoreAdmin implements Admin {
     public void assign(byte[] regionName)
         throws MasterNotRunningException, ZooKeeperConnectionException, IOException {
         LOG.info("assign is a no-op");
+    }
+
+    @Override
+    public void unassign(byte[] regionName)
+        throws MasterNotRunningException, ZooKeeperConnectionException, IOException {
+        LOG.info("unassign is a no-op");
     }
 
     /**
@@ -2021,6 +2065,12 @@ public class KafkaStoreAdmin implements Admin {
         throw new UnsupportedOperationException("getMasterCoprocessors");
     }
 
+    @Override
+    public Future<Void> cloneSnapshotAsync(String snapshotName, TableName tableName, boolean restoreAcl,
+        String customSFT) throws IOException, TableExistsException, RestoreSnapshotException {
+        throw new UnsupportedOperationException("cloneSnapshotAsync");
+    }
+
     /**
      * {@inheritDoc}
      */
@@ -2114,5 +2164,16 @@ public class KafkaStoreAdmin implements Admin {
     @Override
     public List<Boolean> clearSlowLogResponses(Set<ServerName> var1) throws IOException {
         throw new UnsupportedOperationException("clearSlowLogResponses");
+    }
+
+    @Override
+    public List<LogEntry> getLogEntries(Set<ServerName> serverNames, String logType, ServerType serverType,
+        int limit, Map<String, Object> filterParams) throws IOException {
+        throw new UnsupportedOperationException("getLogEntries");
+    }
+
+    @Override
+    public void flushMasterStore() throws IOException {
+        throw new UnsupportedOperationException("flushMasterStore");
     }
 }
