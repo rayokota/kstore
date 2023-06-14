@@ -37,7 +37,7 @@
         <guava.version>32.0.0-jre</guava.version>
         <hbase.version>2.5.4</hbase.version>
         <jackson.version>2.15.2</jackson.version>
-        <kafka.version>3.4.0</kafka.version>
+        <kafka.version>3.5.0</kafka.version>
         <kafka.scala.version>2.13</kafka.scala.version>
         <kcache.version>5.0.0</kcache.version>
         <kryo.version>5.5.0</kryo.version>
